@@ -6,9 +6,9 @@ Target shapes for converting CloudEvents-LD into other models, one folder per ta
 
 | Folder | Target | What OWL 2 RL derives |
 |---|---|---|
-| [dcterms](dcterms/) | [dcterms](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/) | The CloudEvent described with `dct:identifier`, `dct:date`, `dct:subject`, `dct:references`, `dct:relation` and `dct:creator`. |
-| [prov-o](prov-o/) | [PROV-O](https://www.w3.org/TR/prov-o/) | The CloudEvent as a `prov:Entity` (the record), and its producer. Not the occurrence it describes, which would need a new node. |
-| [schema-org](schema-org/) | [schema.org](https://schema.org/) | The CloudEvent as a `schema:Message`, with `schema:identifier`, `schema:about`, `schema:schemaVersion` and `schema:sender`. |
+| [dcterms](dcterms/) | [dcterms](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/) | The CloudEvent described with `dct:identifier`, `dct:date`, `dct:created`, `dct:subject`, `dct:references`, `dct:relation` and `dct:creator`. |
+| [prov-o](prov-o/) | [PROV-O](https://www.w3.org/TR/prov-o/) | The CloudEvent as a `prov:Entity` (the record), when it was generated, and its producer. Not the occurrence it describes, which would need a new node. |
+| [schema-org](schema-org/) | [schema.org](https://schema.org/) | The CloudEvent as a `schema:Message`, with `schema:identifier`, `schema:dateCreated`, `schema:about`, `schema:schemaVersion` and `schema:sender`. |
 
 ## How a conversion runs
 

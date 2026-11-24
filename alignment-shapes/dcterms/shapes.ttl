@@ -34,6 +34,10 @@ cedct:EventShape a sh:NodeShape ;
         sh:or ( [ sh:datatype xsd:dateTime ] [ sh:datatype xsd:dateTimeStamp ] ) ;
         sh:message "dct:date (from ce:time) occurs at most once, as an xsd:dateTime or xsd:dateTimeStamp."@en ] ;
     sh:property [
+        sh:path dct:created ; sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:dateTime ] [ sh:datatype xsd:dateTimeStamp ] ) ;
+        sh:message "dct:created (from ce:recordedtime) occurs at most once, as an xsd:dateTime or xsd:dateTimeStamp."@en ] ;
+    sh:property [
         sh:path dct:subject ; sh:maxCount 1 ;
         sh:nodeKind sh:Literal ;
         sh:message "dct:subject (from ce:subject) occurs at most once, as a literal."@en ] ;

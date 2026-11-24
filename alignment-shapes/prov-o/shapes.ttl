@@ -48,6 +48,10 @@ ceprov:EventShape a sh:NodeShape ;
         sh:path ce:describesOccurrence ; sh:maxCount 1 ;
         sh:message "A CloudEvent describes at most one occurrence."@en ] ;
     sh:property [
+        sh:path prov:generatedAtTime ; sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:dateTime ] [ sh:datatype xsd:dateTimeStamp ] ) ;
+        sh:message "prov:generatedAtTime (from ce:recordedtime) occurs at most once, as an xsd:dateTime or xsd:dateTimeStamp."@en ] ;
+    sh:property [
         sh:path prov:wasAttributedTo ;
         sh:class prov:Agent ;
         sh:message "The producer of the record (from ce:producedBy) must be a prov:Agent."@en ] .

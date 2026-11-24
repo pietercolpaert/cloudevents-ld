@@ -4,10 +4,11 @@
 
 ## Model
 
-PROV-O separates a record from what happened. The CloudEvent is the record, a `prov:Entity`, and OWL 2 RL derives that much for every event, together with the producer when it is known.
+PROV-O separates a record from what happened. The CloudEvent is the record, a `prov:Entity`, and OWL 2 RL derives that much for every event, together with when the record was created and by whom, when the event says so.
 
 ```turtle
 <event> a prov:Entity ;                       # the CloudEvent: a record
+    prov:generatedAtTime "…"^^xsd:dateTimeStamp ;  # = ce:recordedtime, if present
     prov:wasAttributedTo <producer> .         # only if ce:producedBy is known
 ```
 
@@ -33,6 +34,7 @@ The conversion adds to the CloudEvents-LD graph and does not replace it, so the 
 | CloudEvents-LD | PROV-O | How |
 |---|---|---|
 | the event | `a prov:Entity` | `ce:CloudEvent` ⊑ `prov:Entity` in `alignments.ttl` |
+| `ce:recordedtime` | `prov:generatedAtTime` | `ce:recordedtime` ⊑ `prov:generatedAtTime`: both are when the record was created |
 | `ce:producedBy` | `prov:wasAttributedTo`, typed `prov:Agent` | `ce:producedBy` ⊑ `prov:wasAttributedTo` and `ce:Producer` ⊑ `prov:Agent` |
 | `ce:Occurrence`, if the data has one | `prov:Activity` | `ce:Occurrence` ⊑ `prov:Activity` |
 | `ce:time` | — | Would be `prov:startedAtTime` and `prov:endedAtTime` of the occurrence, which OWL 2 RL cannot create. |
@@ -41,5 +43,5 @@ The conversion adds to the CloudEvents-LD graph and does not replace it, so the 
 Not mapped: `ce:id`, `ce:specversion`, `ce:type`, `ce:subject`, `ce:datacontenttype`, `ce:dataschema`, `ce:data` and extension attributes. They stay as CloudEvents-LD. See the [dcterms](../dcterms/) target for a description that does include identifier, time and subject.
 
 Deliberately not produced:
-* **`prov:generatedAtTime` from `ce:time`.** `prov:generatedAtTime` is when the record was created; `ce:time` is when the occurrence happened.
+* **`prov:generatedAtTime` from `ce:time`, also not as a fallback when `ce:recordedtime` is missing.** `prov:generatedAtTime` is when the record was created; `ce:time` is when the occurrence happened. The two differ whenever an occurrence is recorded later, as in a migration or backfill, so the fallback would be wrong for exactly those events. OWL 2 RL cannot express a default based on a missing value anyway.
 * **`prov:wasGeneratedBy` from the record to the occurrence.** In CloudEvents, the producer creates the record, not the occurrence.

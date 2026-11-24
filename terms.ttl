@@ -25,7 +25,7 @@
     dct:description
       """An RDF representation of the CloudEvents 1.0 core event model, context attributes, abstract attribute types, extension attributes, and messaging concepts. This is a non-normative proposal.
 
-Representation rule: each context attribute is represented by a direct predicate whose literal value uses the RDF datatype given by ce:rdfDatatype for the attribute's abstract type. The core attributes and the extension attributes documented in CloudEvents v1.0.2 have predicates in this namespace, named after the attribute (<https://w3id.org/cloudevents#N> for attribute N). Other extension attributes are defined by their producers and use predicates in the producer's own namespace, which can be described with ce:attributeName and ce:attributeType; this vocabulary does not mint IRIs for them. The reified ce:ExtensionAttribute form is a fallback for recording an extension attribute's abstract type explicitly."""@en ;
+Representation rule: each context attribute is represented by a direct predicate whose literal value uses the RDF datatype given by ce:rdfDatatype for the attribute's abstract type. The core attributes, the extension attributes documented in CloudEvents v1.0.2, and recordedtime (documented after v1.0.2) have predicates in this namespace, named after the attribute (<https://w3id.org/cloudevents#N> for attribute N). Other extension attributes are defined by their producers and use predicates in the producer's own namespace, which can be described with ce:attributeName and ce:attributeType; this vocabulary does not mint IRIs for them. The reified ce:ExtensionAttribute form is a fallback for recording an extension attribute's abstract type explicitly."""@en ;
     dct:creator <https://pietercolpaert.be/#me> ;
     dct:rightsHolder "Vlaamse Regio"@nl ;
     dct:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
@@ -354,6 +354,19 @@ ce:sequencetype a ce:AttributeProperty ;
     rdfs:seeAlso <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/sequence.md> ;
     rdfs:comment
       "Sequence extension: semantics of the sequence attribute. The only value defined in v1.0.2 is 'Integer' (sequence holds string-encoded signed 32-bit integers)."@en .
+
+# Extension attribute documented after v1.0.2 (work in progress towards CloudEvents 1.0.3)
+
+ce:recordedtime a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "recordedtime"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:dateTimeStamp ;
+    ce:attributeName "recordedtime" ;
+    ce:attributeType ce:Timestamp ;
+    rdfs:seeAlso <https://github.com/cloudevents/spec/blob/main/cloudevents/extensions/recordedtime.md> ;
+    rdfs:comment
+      "Recorded Time extension: when the occurrence was recorded in this CloudEvent, i.e. when the producer created the CloudEvent. Distinct from ce:time, the time of the occurrence, which makes events bitemporal; it should be equal to or later than ce:time. Intermediaries must not change it. Not part of the CloudEvents v1.0.2 release: it is documented in the work in progress towards 1.0.3."@en .
 
 # Fallback: reified extension attributes
 

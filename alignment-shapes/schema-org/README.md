@@ -9,6 +9,7 @@ A CloudEvent is a `schema:Message`, "a single message from a sender to one or mo
 ```turtle
 <event> a schema:Message ;
     schema:identifier "…" ;                  # = ce:id
+    schema:dateCreated "…" ;                 # = ce:recordedtime, if present
     schema:about "…" ;                       # = ce:subject
     schema:schemaVersion <schema> ;          # = ce:dataschema
     schema:sender <producer> .               # = ce:producedBy, if known
@@ -22,6 +23,7 @@ The namespace is `http://schema.org/`, the one schema.org's own JSON-LD context 
 |---|---|---|
 | the event | `a schema:Message` | Not `schema:Event`: that is the happening itself, not a record of it. |
 | `ce:id` | `schema:identifier` | Unique within `ce:source`. |
+| `ce:recordedtime` | `schema:dateCreated` | "The date on which the CreativeWork was created": when the producer created the message. |
 | `ce:subject` | `schema:about` | "The subject matter of the content." |
 | `ce:dataschema` | `schema:schemaVersion` | "A particular version of a schema used in some CreativeWork": the payload, part of the message, uses this schema. |
 | `ce:producedBy` | `schema:sender` | The producer sends the message. |

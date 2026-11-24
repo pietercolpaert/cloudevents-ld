@@ -24,6 +24,7 @@
     "partitionkey": "ce:partitionkey",
     "sampledrate": "ce:sampledrate",
     "sequence": "ce:sequence",
-    "sequencetype": "ce:sequencetype"
+    "sequencetype": "ce:sequencetype",
+    "recordedtime": { "@id": "ce:recordedtime", "@type": "xsd:dateTimeStamp" }
   }
 }

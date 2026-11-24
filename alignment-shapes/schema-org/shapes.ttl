@@ -35,6 +35,10 @@ ceso:MessageShape a sh:NodeShape ;
         sh:datatype xsd:string ;
         sh:message "schema:identifier (from ce:id) occurs exactly once, as a string."@en ] ;
     sh:property [
+        sh:path schema:dateCreated ; sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:dateTime ] [ sh:datatype xsd:dateTimeStamp ] ) ;
+        sh:message "schema:dateCreated (from ce:recordedtime) occurs at most once, as a DateTime."@en ] ;
+    sh:property [
         sh:path schema:about ; sh:maxCount 1 ;
         sh:nodeKind sh:Literal ;
         sh:message "schema:about (from ce:subject) occurs at most once, as text."@en ] ;

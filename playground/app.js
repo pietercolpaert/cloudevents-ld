@@ -23,8 +23,8 @@ const editor = (id, mode, readOnly = false) => CodeMirror($(id), {
 });
 const json = { name: 'javascript', json: true };
 const eventsCm = editor('events-editor', json);
-const mainContextCm = editor('main-context-editor', json, true);
-mainContextCm.setValue(mainContextText);
+// The CloudEvents-LD context is not editable: a highlighted code block, not an editor.
+CodeMirror.runMode(mainContextText, json, $('main-context-code').firstElementChild);
 const contextCm = editor('context-editor', json);
 const logCm = editor('log-editor', 'text/turtle', true);
 const alignedCm = editor('aligned-editor', 'text/turtle', true);
@@ -288,7 +288,6 @@ const scheduleUpdate = () => {
 eventsCm.on('change', scheduleUpdate);
 contextCm.on('change', scheduleUpdate);
 $('producer-context').addEventListener('toggle', () => contextCm.refresh());
-$('main-context').addEventListener('toggle', () => mainContextCm.refresh());
 
 for (const button of document.querySelectorAll('.copy-btn')) {
   button.addEventListener('click', async () => {

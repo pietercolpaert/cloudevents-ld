@@ -39,7 +39,7 @@ A separate payload step can choose a mapping per `datacontenttype` and `datasche
 
 ## Extension attributes
 
-`context.jsonld` maps the core attributes and the extension attributes that CloudEvents v1.0.2 documents (`dataref`, `traceparent`, `tracestate`, `partitionkey`, `sampledrate`, `sequence`, `sequencetype`) to terms in `terms.ttl`.
+`context.jsonld` maps the core attributes and the extension attributes that CloudEvents v1.0.2 documents (`dataref`, `traceparent`, `tracestate`, `partitionkey`, `sampledrate`, `sequence`, `sequencetype`) to terms in `terms.ttl`. It also maps `recordedtime`, documented after v1.0.2, which records when the producer created the event, as opposed to `time`, when the occurrence happened.
 
 Producers define other extension attributes, such as Debezium's `iodebezium*` or Keptn's `shkeptncontext`. Their meaning is up to the producer, so CloudEvents-LD does not mint IRIs for them, and JSON-LD drops them unless a context maps them.
 

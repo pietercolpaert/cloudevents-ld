@@ -10,6 +10,9 @@
 #  - ce:time is not prov:generatedAtTime, dct:created, dct:issued or dct:modified:
 #    those are specific moments in the life of the record (its creation, publication,
 #    change), while ce:time is the time of the occurrence. It is a dct:date (below).
+#    The record's creation time is ce:recordedtime, aligned below. Without it, nothing
+#    is derived: ce:time is no fallback, as it would be wrong for every event recorded
+#    after its occurrence (and OWL 2 RL cannot express a default anyway).
 #  - ce:source is not dct:source: it is a literal naming the context of the
 #    occurrence; dct:source relates a resource to one it is derived from.
 #  - ce:dataschema is not dct:conformsTo: the schema describes the payload (ce:data),
@@ -25,7 +28,8 @@
 #    defines as an object that provides information about an action, and a
 #    schema:Message.
 #  - ce:time is not schema:dateSent or schema:dateCreated: those are moments in the
-#    life of the message, not the time of the occurrence.
+#    life of the message, not the time of the occurrence. ce:recordedtime is a
+#    schema:dateCreated (below).
 #  - ce:datacontenttype is not schema:encodingFormat: on a schema:Message, that would
 #    be the format of the message itself, while ce:datacontenttype is the payload's.
 #
@@ -63,6 +67,7 @@ ce:datacontenttype a owl:DatatypeProperty .
 ce:subject         a owl:DatatypeProperty .
 ce:time            a owl:DatatypeProperty .
 ce:traceparent     a owl:DatatypeProperty .
+ce:recordedtime    a owl:DatatypeProperty .
 ce:tracestate      a owl:DatatypeProperty .
 ce:partitionkey    a owl:DatatypeProperty .
 ce:sampledrate     a owl:DatatypeProperty .
@@ -95,6 +100,10 @@ ce:Consumer      rdfs:subClassOf prov:Agent .
 ce:Intermediary  rdfs:subClassOf prov:Agent .
 ce:producedBy    rdfs:subPropertyOf prov:wasAttributedTo .
 
+# recordedtime is "when the CloudEvent was created by a producer"; generatedAtTime is
+# "the time at which an entity was completely created". The entity is the record.
+ce:recordedtime  rdfs:subPropertyOf prov:generatedAtTime .
+
 # An occurrence is a "noteworthy activity" (CloudEvents core, "Occurrence").
 ce:Occurrence    rdfs:subClassOf prov:Activity .
 
@@ -123,6 +132,9 @@ ce:producedBy    rdfs:subPropertyOf dct:creator .
 # resource", the generic time property of which dct:created, dct:issued and
 # dct:modified are specific cases. The occurrence a CloudEvent records is such an event.
 ce:time          rdfs:subPropertyOf dct:date .
+
+# created is the "date of creation of the resource": the record, made by its producer.
+ce:recordedtime  rdfs:subPropertyOf dct:created .
 
 # subject is "a topic of the resource"; DCMI allows "a literal value that identifies
 # the subject" when no IRI is available, which is what ce:subject holds.
@@ -157,6 +169,9 @@ ce:CloudEvent    rdfs:subClassOf schema:Message .
 ce:id            rdfs:subPropertyOf schema:identifier .
 ce:producedBy    rdfs:subPropertyOf schema:sender .
 
+# dateCreated is "the date on which the CreativeWork was created": here the message.
+ce:recordedtime  rdfs:subPropertyOf schema:dateCreated .
+
 # about is "the subject matter of the content". It expects a Thing, but schema.org
 # accepts text where a Thing is expected, which is what ce:subject holds.
 ce:subject       rdfs:subPropertyOf schema:about .
@@ -183,6 +198,9 @@ dct:conformsTo         a owl:ObjectProperty .
 dct:hasPart            a owl:ObjectProperty .
 dct:identifier         a owl:DatatypeProperty .
 dct:date               a owl:DatatypeProperty .
+dct:created            a owl:DatatypeProperty .
+prov:generatedAtTime   a owl:DatatypeProperty .
+schema:dateCreated     a owl:DatatypeProperty .
 # dct:subject allows IRIs and literals; this ontology only uses it with literals.
 dct:subject            a owl:DatatypeProperty .
 dct:references         a owl:ObjectProperty .

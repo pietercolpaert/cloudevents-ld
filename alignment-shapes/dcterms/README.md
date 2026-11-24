@@ -9,6 +9,7 @@ The CloudEvent is described as a resource with the generic DCMI properties: what
 ```turtle
 <event> dct:identifier "…" ;                 # = ce:id
     dct:date "…"^^xsd:dateTimeStamp ;        # = ce:time
+    dct:created "…"^^xsd:dateTimeStamp ;     # = ce:recordedtime, if present
     dct:subject "…" ;                        # = ce:subject
     dct:references <payload> ;               # = ce:dataref
     dct:relation <schema> ;                  # = ce:dataschema
@@ -25,6 +26,7 @@ The conversion adds to the CloudEvents-LD graph and does not replace it, so the 
 |---|---|---|
 | `ce:id` | `dct:identifier` | "An unambiguous reference to the resource within a given context": here the context is `ce:source`. |
 | `ce:time` | `dct:date` | "A point or period of time associated with an event in the lifecycle of the resource": the generic time property. |
+| `ce:recordedtime` | `dct:created` | "Date of creation of the resource": when the producer created the event record. |
 | `ce:subject` | `dct:subject` | DCMI allows "a literal value that identifies the subject" when no IRI is available. |
 | `ce:dataref` | `dct:references` | The event points to where its payload is stored. |
 | `ce:dataschema` | `dct:relation` | A related resource. Not `dct:conformsTo`: the payload conforms to the schema, not the event record. |

@@ -7,6 +7,9 @@
 #    checked, because JavaScript regexes without the 'u' flag cannot express them.
 #  - Producer-defined extension predicates (e.g. added by a producer-specific JSON-LD
 #    context) are not validated; their names cannot be checked generically with SHACL Core.
+#  - Comparing ce:time with ce:recordedtime (sh:lessThanOrEquals) needs a validator that
+#    orders xsd:dateTimeStamp values. eyemind does; pyshacl (via rdflib) cannot, and stops
+#    with an error on events that have both.
 
 @prefix ce:   <https://w3id.org/cloudevents#> .
 @prefix cesh: <https://w3id.org/cloudevents/shapes#> .
@@ -87,7 +90,7 @@ cesh:CloudEventShape a sh:NodeShape ;
     sh:targetSubjectsOf ce:id, ce:source, ce:specversion, ce:type,
         ce:datacontenttype, ce:dataschema, ce:subject, ce:time, ce:data,
         ce:dataref, ce:traceparent, ce:tracestate, ce:partitionkey,
-        ce:sampledrate, ce:sequence, ce:sequencetype, ce:extensionAttribute ;
+        ce:sampledrate, ce:sequence, ce:sequencetype, ce:recordedtime, ce:extensionAttribute ;
 
     # Required core attributes
     sh:property [
@@ -167,7 +170,17 @@ cesh:CloudEventShape a sh:NodeShape ;
     sh:property [
         sh:path ce:sequencetype ; sh:maxCount 1 ;
         sh:node cesh:NonEmptyStringValue ;
-        sh:message "sequencetype occurs at most once and must be a nonempty String."@en ] .
+        sh:message "sequencetype occurs at most once and must be a nonempty String."@en ] ;
+
+    # Recorded Time extension (documented after v1.0.2)
+    sh:property [
+        sh:path ce:recordedtime ; sh:maxCount 1 ;
+        sh:node cesh:TimestampValue ;
+        sh:message "recordedtime occurs at most once and must be a Timestamp."@en ] ;
+    sh:property [
+        sh:path ce:time ; sh:severity sh:Warning ;
+        sh:lessThanOrEquals ce:recordedtime ;
+        sh:message "recordedtime should be equal to or later than time: an occurrence is recorded after it happens."@en ] .
     # Reified extension attributes are validated by cesh:ExtensionAttributeShape through
     # its own targets. They are not nested here with sh:node, because sh:node would turn
     # that shape's warnings into violations of the event.
@@ -214,7 +227,7 @@ cesh:ExtensionAttributeShape a sh:NodeShape ;
     sh:property [
         sh:path ce:attributeName ; sh:severity sh:Warning ;
         sh:not [ sh:in ( "dataref" "traceparent" "tracestate" "partitionkey"
-                         "sampledrate" "sequence" "sequencetype" ) ] ;
+                         "sampledrate" "sequence" "sequencetype" "recordedtime" ) ] ;
         sh:message "Documented extensions have a direct predicate (ce:{name}); prefer it."@en ] ;
     sh:property [
         sh:path ce:attributeName ; sh:severity sh:Warning ; sh:maxLength 20 ;
