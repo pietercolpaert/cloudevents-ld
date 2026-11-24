@@ -1,6 +1,6 @@
-# CloudEvents-LD → DCMI Metadata Terms
+# CloudEvents-LD → dcterms
 
-[`shapes.ttl`](shapes.ttl) describes the [DCMI Metadata Terms](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/) (`dct:`) description of a CloudEvent that a conversion of CloudEvents-LD must produce.
+[`shapes.ttl`](shapes.ttl) describes the [dcterms](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/) (DCMI Metadata Terms, `dct:`) description of a CloudEvent that a conversion of CloudEvents-LD must produce.
 
 ## Model
 
@@ -21,7 +21,7 @@ The conversion adds to the CloudEvents-LD graph and does not replace it, so the 
 
 ## Mapping
 
-| CloudEvents-LD | DCMI Metadata Terms | Notes |
+| CloudEvents-LD | dcterms | Notes |
 |---|---|---|
 | `ce:id` | `dct:identifier` | "An unambiguous reference to the resource within a given context": here the context is `ce:source`. |
 | `ce:time` | `dct:date` | "A point or period of time associated with an event in the lifecycle of the resource": the generic time property. |

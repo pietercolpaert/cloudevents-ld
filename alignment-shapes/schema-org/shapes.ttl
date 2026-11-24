@@ -1,0 +1,48 @@
+# Target shapes for converting CloudEvents-LD to schema.org.
+#
+# These shapes describe the graph that a conversion (e.g. eyemind with OWL 2 RL over
+# terms.ttl and alignments.ttl) must produce from CloudEvents-LD. See README.md in this
+# folder for the mapping. Every property here follows from alignments.ttl.
+#
+# Types are stated as property shapes on rdf:type (sh:hasValue), not as a node-level
+# sh:class: eyemind reads the property shapes of --shacl-out as the triples it must
+# derive, so this also asks the reasoner for the type triples.
+
+@prefix ce:     <https://w3id.org/cloudevents#> .
+@prefix ceso:   <https://w3id.org/cloudevents/alignment-shapes/schema-org#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix dct:    <http://purl.org/dc/terms/> .
+
+<https://w3id.org/cloudevents/alignment-shapes/schema-org> a owl:Ontology ;
+    dct:title "CloudEvents-LD to schema.org: target shapes (proposal)"@en ;
+    rdfs:seeAlso <https://schema.org/Message> , <https://w3id.org/cloudevents> .
+
+ceso:MessageShape a sh:NodeShape ;
+    rdfs:label "CloudEvent as a schema.org Message"@en ;
+    rdfs:comment
+      "Targeting the subjects of ce:id checks that the conversion covered every event in the input."@en ;
+    sh:targetSubjectsOf ce:id ;
+    sh:property [
+        sh:path rdf:type ; sh:hasValue schema:Message ;
+        sh:message "A CloudEvent must be typed schema:Message."@en ] ;
+    sh:property [
+        sh:path schema:identifier ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "schema:identifier (from ce:id) occurs exactly once, as a string."@en ] ;
+    sh:property [
+        sh:path schema:about ; sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:message "schema:about (from ce:subject) occurs at most once, as text."@en ] ;
+    sh:property [
+        sh:path schema:schemaVersion ; sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "schema:schemaVersion (from ce:dataschema) occurs at most once, as a URL."@en ] ;
+    sh:property [
+        sh:path schema:sender ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:message "schema:sender (from ce:producedBy) is a resource."@en ] .

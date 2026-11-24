@@ -8,7 +8,7 @@ A Linked Data vocabulary for CloudEvents to ensure we can become interoperable w
  * `shapes.ttl` contains a SHACL shape
  * `context.jsonld` contains a JSON-LD context that can be used as an external context on any cloudevents. It maps the event envelope; the `data` payload becomes an opaque `rdf:JSON` literal (see [Scope](#scope-cloudevents-describe-the-envelope-not-the-data-payload)). Extension attributes that CloudEvents does not define are left out; add a producer-specific context for those (see [Extension attributes](#extension-attributes)).
  * `alignments.ttl` contains the OWL declarations and alignments with other vocabularies such as PROV-O; it is imported by `terms.ttl`.
- * `alignment-shapes/` contains, per target model (PROV-O, DCMI Metadata Terms), the SHACL shapes and mapping for converting CloudEvents-LD into that model with OWL 2 RL. See the [alignment shapes index](alignment-shapes/README.md).
+ * `alignment-shapes/` contains, per target model (dcterms, PROV-O, schema.org), the SHACL shapes and mapping for converting CloudEvents-LD into that model with OWL 2 RL. See the [alignment shapes index](alignment-shapes/README.md).
  * `examples/` contains real CloudEvents and their RDF, such as the [Flemish address register example](examples/flanders-grar/). See the [examples index](examples/README.md).
  * `scripts/build-examples.js` generates every `examples/*/events.ttl` from its `events.json`.
  * `spec.bs` the source of the specification which tells you how to use CloudEvents in combination with RDF tooling.

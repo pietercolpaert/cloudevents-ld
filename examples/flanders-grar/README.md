@@ -23,7 +23,7 @@ const nquads = await jsonld.toRDF(events, { expandContext: { '@context': [shared
 
 ## Changes compared with the first attempt
 
-The first attempt mapped the envelope onto existing vocabularies, mostly DCMI Terms, and the payload onto OSLO. Here the envelope maps onto the CloudEvents-LD vocabulary, and the payload stays an opaque `rdf:JSON` literal.
+The first attempt mapped the envelope onto existing vocabularies, mostly dcterms, and the payload onto OSLO. Here the envelope maps onto the CloudEvents-LD vocabulary, and the payload stays an opaque `rdf:JSON` literal.
 
 | JSON member | First attempt | Here | Why |
 |---|---|---|---|

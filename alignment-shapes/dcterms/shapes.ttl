@@ -1,4 +1,4 @@
-# Target shapes for converting CloudEvents-LD to DCMI Metadata Terms.
+# Target shapes for converting CloudEvents-LD to dcterms (DCMI Metadata Terms).
 #
 # These shapes describe the graph that a conversion (e.g. eyemind with OWL 2 RL over
 # terms.ttl and alignments.ttl) must produce from CloudEvents-LD. See README.md in this
@@ -17,11 +17,11 @@
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
 
 <https://w3id.org/cloudevents/alignment-shapes/dcterms> a owl:Ontology ;
-    dct:title "CloudEvents-LD to DCMI Metadata Terms: target shapes (proposal)"@en ;
+    dct:title "CloudEvents-LD to dcterms: target shapes (proposal)"@en ;
     rdfs:seeAlso <https://www.dublincore.org/specifications/dublin-core/dcmi-terms/> , <https://w3id.org/cloudevents> .
 
 cedct:EventShape a sh:NodeShape ;
-    rdfs:label "CloudEvent described with DCMI Metadata Terms"@en ;
+    rdfs:label "CloudEvent described with dcterms"@en ;
     rdfs:comment
       "Targeting the subjects of ce:id checks that the conversion covered every event in the input."@en ;
     sh:targetSubjectsOf ce:id ;

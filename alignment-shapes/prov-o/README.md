@@ -38,7 +38,7 @@ The conversion adds to the CloudEvents-LD graph and does not replace it, so the 
 | `ce:time` | — | Would be `prov:startedAtTime` and `prov:endedAtTime` of the occurrence, which OWL 2 RL cannot create. |
 | `ce:source` | — | Would be `prov:atLocation` of the occurrence, and needs an IRI where `ce:source` is a literal. |
 
-Not mapped: `ce:id`, `ce:specversion`, `ce:type`, `ce:subject`, `ce:datacontenttype`, `ce:dataschema`, `ce:data` and extension attributes. They stay as CloudEvents-LD. See the [DCMI Metadata Terms](../dcterms/) target for a description that does include identifier, time and subject.
+Not mapped: `ce:id`, `ce:specversion`, `ce:type`, `ce:subject`, `ce:datacontenttype`, `ce:dataschema`, `ce:data` and extension attributes. They stay as CloudEvents-LD. See the [dcterms](../dcterms/) target for a description that does include identifier, time and subject.
 
 Deliberately not produced:
 * **`prov:generatedAtTime` from `ce:time`.** `prov:generatedAtTime` is when the record was created; `ce:time` is when the occurrence happened.
