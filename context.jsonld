@@ -1,0 +1,29 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@protected": true,
+    "ce": "https://w3id.org/cloudevents#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+
+    "id": "ce:id",
+    "source": { "@id": "ce:source", "@type": "xsd:anyURI" },
+    "specversion": "ce:specversion",
+    "type": "ce:type",
+
+    "datacontenttype": "ce:datacontenttype",
+    "dataschema": { "@id": "ce:dataschema", "@type": "@id" },
+    "subject": "ce:subject",
+    "time": { "@id": "ce:time", "@type": "xsd:dateTimeStamp" },
+
+    "data": { "@id": "ce:data", "@type": "@json" },
+    "data_base64": { "@id": "ce:data", "@type": "xsd:base64Binary" },
+
+    "dataref": { "@id": "ce:dataref", "@type": "@id" },
+    "traceparent": "ce:traceparent",
+    "tracestate": "ce:tracestate",
+    "partitionkey": "ce:partitionkey",
+    "sampledrate": "ce:sampledrate",
+    "sequence": "ce:sequence",
+    "sequencetype": "ce:sequencetype"
+  }
+}

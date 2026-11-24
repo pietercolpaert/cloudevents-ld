@@ -1,0 +1,167 @@
+# CloudEvents-LD alignments: OWL declarations and links to other vocabularies.
+# Imported by terms.ttl (owl:imports <alignments.ttl>), so every axiom here is an
+# inference anyone loading the vocabulary gets. Only alignments that hold for EVERY
+# CloudEvent belong here. Mappings that depend on the event type or payload
+# (as:Create, SOSA, OSLO identifiers, ...) belong in rules, not in this file.
+#
+# Deliberate NON-alignments, so they are not added later by accident:
+#  - ce:type is not rdf:type, dct:type or an ActivityStreams activity type: it is
+#    a producer-defined string. Mapping it to as:Create etc. is a per-type rule.
+#  - ce:time is not prov:generatedAtTime, dct:created, dct:issued or dct:modified:
+#    those are specific moments in the life of the record (its creation, publication,
+#    change), while ce:time is the time of the occurrence. It is a dct:date (below).
+#  - ce:source is not dct:source: it is a literal naming the context of the
+#    occurrence; dct:source relates a resource to one it is derived from.
+#  - ce:dataschema is not dct:conformsTo: the schema describes the payload (ce:data),
+#    not the event record it is attached to.
+#  - ce:datacontenttype is a literal, so it cannot be a sub-property of dct:format or
+#    dcat:mediaType (whose values are resources). A rule can map it to a media-type IRI.
+#  - ce:time is not as:published: that is when the activity was published.
+#  - ce:source is not as:context and ce:subject is not as:object: the CloudEvents
+#    attributes are literals. A rule can add as:context for an absolute source, and a
+#    producer-specific rule can add as:object.
+#  - ce:CloudEvent is not schema:Event: that is the happening itself (closer to
+#    ce:Occurrence), not a record about it. It is an as:Activity, which ActivityStreams
+#    defines as an object that provides information about an action.
+#
+# The conversions to PROV-O and DCMI Metadata Terms, and what OWL 2 RL cannot derive
+# for them, are documented in alignment-shapes/.
+
+@base    <https://w3id.org/cloudevents/> .
+@prefix ce:   <https://w3id.org/cloudevents#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix as:   <https://www.w3.org/ns/activitystreams#> .
+
+<alignments.ttl> a owl:Ontology ;
+    dct:title "CloudEvents-LD alignments (proposal)"@en ;
+    dct:description
+      "OWL 2 declarations for the CloudEvents-LD vocabulary, and alignments with DCMI Metadata Terms, the DCMI Type Vocabulary, PROV-O and ActivityStreams 2.0."@en .
+
+# OWL 2 property declarations.
+# The annotation properties may be used on both predicates and individuals,
+# which keeps their open domain compatible with OWL 2 DL.
+
+ce:attributeName a owl:AnnotationProperty .
+ce:attributeType a owl:AnnotationProperty .
+ce:rdfDatatype   a owl:AnnotationProperty .
+
+ce:id              a owl:DatatypeProperty .
+ce:source          a owl:DatatypeProperty .
+ce:specversion     a owl:DatatypeProperty .
+ce:type            a owl:DatatypeProperty .
+ce:datacontenttype a owl:DatatypeProperty .
+ce:subject         a owl:DatatypeProperty .
+ce:time            a owl:DatatypeProperty .
+ce:traceparent     a owl:DatatypeProperty .
+ce:tracestate      a owl:DatatypeProperty .
+ce:partitionkey    a owl:DatatypeProperty .
+ce:sampledrate     a owl:DatatypeProperty .
+ce:sequence        a owl:DatatypeProperty .
+ce:sequencetype    a owl:DatatypeProperty .
+ce:attributeValue  a owl:DatatypeProperty .
+ce:data            a owl:DatatypeProperty .
+
+ce:dataschema           a owl:ObjectProperty .
+ce:dataref              a owl:ObjectProperty .
+ce:extensionAttribute   a owl:ObjectProperty .
+ce:describesOccurrence  a owl:ObjectProperty .
+ce:producedBy           a owl:ObjectProperty .
+ce:carriesEvent         a owl:ObjectProperty .
+ce:usesEventFormat      a owl:ObjectProperty .
+ce:usesProtocolBinding  a owl:ObjectProperty .
+
+# Event identity: (source, id) identifies an event (CloudEvents core, "id").
+# OWL 2 keys only apply to named individuals, so blank-node events, such as those
+# produced by the JSON-LD context, are unaffected. Two events with IRIs that share
+# source and id are inferred to be owl:sameAs: retransmitted duplicates.
+
+ce:CloudEvent owl:hasKey ( ce:source ce:id ) .
+
+# PROV-O
+
+ce:CloudEvent    rdfs:subClassOf prov:Entity .
+ce:Producer      rdfs:subClassOf prov:Agent .
+ce:Consumer      rdfs:subClassOf prov:Agent .
+ce:Intermediary  rdfs:subClassOf prov:Agent .
+ce:producedBy    rdfs:subPropertyOf prov:wasAttributedTo .
+
+# An occurrence is a "noteworthy activity" (CloudEvents core, "Occurrence").
+ce:Occurrence    rdfs:subClassOf prov:Activity .
+
+# ActivityStreams 2.0
+# An activity "provides information about actions that have either already occurred,
+# are in the process of occurring, or may occur in the future": a record, like a
+# CloudEvent. Its start and end time are the time of the action; a CloudEvent records
+# an instant, so ce:time is both. The generator is "the entity (e.g. an application)
+# that generated the object": the producer of the record.
+
+ce:CloudEvent    rdfs:subClassOf as:Activity .
+ce:time          rdfs:subPropertyOf as:startTime , as:endTime .
+ce:producedBy    rdfs:subPropertyOf as:generator .
+
+# DCMI Metadata Terms
+
+# id is "an unambiguous reference to the resource within a given context";
+# for a CloudEvent, that context is its source.
+ce:id            rdfs:subPropertyOf dct:identifier .
+
+# The producer is the entity responsible for making the event record.
+ce:Producer      rdfs:subClassOf dct:Agent .
+ce:producedBy    rdfs:subPropertyOf dct:creator .
+
+# date is "a point or period of time associated with an event in the lifecycle of the
+# resource", the generic time property of which dct:created, dct:issued and
+# dct:modified are specific cases. The occurrence a CloudEvent records is such an event.
+ce:time          rdfs:subPropertyOf dct:date .
+
+# subject is "a topic of the resource"; DCMI allows "a literal value that identifies
+# the subject" when no IRI is available, which is what ce:subject holds.
+ce:subject       rdfs:subPropertyOf dct:subject .
+
+# dataref is where the event's payload is stored: a resource the event points to.
+ce:dataref       rdfs:subPropertyOf dct:references .
+
+# The schema of the payload is related to the event, though the event itself does
+# not conform to it (hence not dct:conformsTo).
+ce:dataschema    rdfs:subPropertyOf dct:relation .
+
+# Event formats and protocol bindings are specifications messages conform to.
+# This also makes ce:JSONEventFormat, ce:HTTPProtocolBinding, ... valid values of
+# dct:conformsTo in DCAT-AP descriptions of event feeds (distributions, data services).
+ce:EventFormat         rdfs:subClassOf dct:Standard .
+ce:ProtocolBinding     rdfs:subClassOf dct:Standard .
+ce:usesEventFormat     rdfs:subPropertyOf dct:conformsTo .
+ce:usesProtocolBinding rdfs:subPropertyOf dct:conformsTo .
+
+# A message contains the events it carries (in body and/or metadata).
+ce:carriesEvent  rdfs:subPropertyOf dct:hasPart .
+
+# DCMI Type Vocabulary: "a non-persistent, time-based occurrence".
+ce:Occurrence    rdfs:subClassOf dcmitype:Event .
+
+# OWL 2 declarations of the external terms used above, so the file stays OWL 2 DL
+# without importing the external vocabularies.
+prov:Entity            a owl:Class .
+prov:Agent             a owl:Class .
+dct:Agent              a owl:Class .
+dct:Standard           a owl:Class .
+dcmitype:Event         a owl:Class .
+prov:Activity          a owl:Class .
+as:Activity            a owl:Class .
+as:generator           a owl:ObjectProperty .
+as:startTime           a owl:DatatypeProperty .
+as:endTime             a owl:DatatypeProperty .
+prov:wasAttributedTo   a owl:ObjectProperty .
+dct:creator            a owl:ObjectProperty .
+dct:conformsTo         a owl:ObjectProperty .
+dct:hasPart            a owl:ObjectProperty .
+dct:identifier         a owl:DatatypeProperty .
+dct:date               a owl:DatatypeProperty .
+# dct:subject allows IRIs and literals; this ontology only uses it with literals.
+dct:subject            a owl:DatatypeProperty .
+dct:references         a owl:ObjectProperty .
+dct:relation           a owl:ObjectProperty .

@@ -1,0 +1,22 @@
+{
+  "name": "cloudevents-ld",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Linked Data vocabulary, JSON-LD context and SHACL shapes for CloudEvents",
+  "license": "EUPL-1.2",
+  "type": "module",
+  "scripts": {
+    "build:examples": "node scripts/build-examples.js",
+    "build:playground": "node scripts/build-playground.js",
+    "build": "npm run build:examples && npm run build:playground",
+    "start": "npm run build && npx --yes http-server _site -c-1 -o"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "jsonld": "8.3.3",
+    "n3": "1.17.4"
+  },
+  "dependencies": {
+    "eyemind": "^0.8.41"
+  }
+}

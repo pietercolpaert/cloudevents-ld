@@ -1,0 +1,51 @@
+# Target shapes for converting CloudEvents-LD to DCMI Metadata Terms.
+#
+# These shapes describe the graph that a conversion (e.g. eyemind with OWL 2 RL over
+# terms.ttl and alignments.ttl) must produce from CloudEvents-LD. See README.md in this
+# folder for the mapping. Every property here follows from alignments.ttl, so no
+# rules are needed.
+#
+# eyemind reads the property shapes of --shacl-out as the triples it must derive.
+
+@prefix ce:    <https://w3id.org/cloudevents#> .
+@prefix cedct: <https://w3id.org/cloudevents/alignment-shapes/dcterms#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+
+<https://w3id.org/cloudevents/alignment-shapes/dcterms> a owl:Ontology ;
+    dct:title "CloudEvents-LD to DCMI Metadata Terms: target shapes (proposal)"@en ;
+    rdfs:seeAlso <https://www.dublincore.org/specifications/dublin-core/dcmi-terms/> , <https://w3id.org/cloudevents> .
+
+cedct:EventShape a sh:NodeShape ;
+    rdfs:label "CloudEvent described with DCMI Metadata Terms"@en ;
+    rdfs:comment
+      "Targeting the subjects of ce:id checks that the conversion covered every event in the input."@en ;
+    sh:targetSubjectsOf ce:id ;
+    sh:property [
+        sh:path dct:identifier ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "dct:identifier (from ce:id) occurs exactly once, as a string."@en ] ;
+    sh:property [
+        sh:path dct:date ; sh:maxCount 1 ;
+        sh:or ( [ sh:datatype xsd:dateTime ] [ sh:datatype xsd:dateTimeStamp ] ) ;
+        sh:message "dct:date (from ce:time) occurs at most once, as an xsd:dateTime or xsd:dateTimeStamp."@en ] ;
+    sh:property [
+        sh:path dct:subject ; sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:message "dct:subject (from ce:subject) occurs at most once, as a literal."@en ] ;
+    sh:property [
+        sh:path dct:references ; sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "dct:references (from ce:dataref) occurs at most once, as an IRI."@en ] ;
+    sh:property [
+        sh:path dct:relation ; sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "dct:relation (from ce:dataschema) occurs at most once, as an IRI."@en ] ;
+    sh:property [
+        sh:path dct:creator ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:message "dct:creator (from ce:producedBy) is a resource."@en ] .

@@ -1,0 +1,247 @@
+# SHACL shapes for CloudEvents-LD (CloudEvents core v1.0.2 and documented extensions).
+#
+# Only SHACL Core is used (no SHACL-SPARQL), so the shapes run in JavaScript, Python and
+# Java engines. Regular expressions use \uXXXX escapes, which all three regex dialects
+# understand. Known gaps:
+#  - Noncharacters outside the Basic Multilingual Plane (U+1FFFE, U+1FFFF, ...) are not
+#    checked, because JavaScript regexes without the 'u' flag cannot express them.
+#  - Producer-defined extension predicates (e.g. added by a producer-specific JSON-LD
+#    context) are not validated; their names cannot be checked generically with SHACL Core.
+
+@prefix ce:   <https://w3id.org/cloudevents#> .
+@prefix cesh: <https://w3id.org/cloudevents/shapes#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+
+<https://w3id.org/cloudevents/shapes> a owl:Ontology ;
+    dct:title "CloudEvents-LD SHACL shapes (proposal)"@en ;
+    rdfs:seeAlso <https://w3id.org/cloudevents> .
+
+# ---------------------------------------------------------------------------
+# Value shapes: one per CloudEvents abstract type (focus node is a literal)
+# ---------------------------------------------------------------------------
+
+cesh:StringValue a sh:NodeShape ;
+    rdfs:label "CloudEvents String value"@en ;
+    sh:datatype xsd:string ;
+    sh:pattern "^[^\\u0000-\\u001F\\u007F-\\u009F\\uFDD0-\\uFDEF\\uFFFE\\uFFFF]*$" ;
+    sh:message "A CloudEvents String is an xsd:string without control characters or noncharacters."@en .
+
+cesh:NonEmptyStringValue a sh:NodeShape ;
+    rdfs:label "Nonempty CloudEvents String value"@en ;
+    sh:node cesh:StringValue ;
+    sh:minLength 1 ;
+    sh:message "Value must be a nonempty CloudEvents String."@en .
+
+cesh:IntegerValue a sh:NodeShape ;
+    rdfs:label "CloudEvents Integer value"@en ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive -2147483648 ;
+    sh:maxInclusive 2147483647 ;
+    sh:message "A CloudEvents Integer is an xsd:integer in the signed 32-bit range."@en .
+
+cesh:BooleanValue a sh:NodeShape ;
+    rdfs:label "CloudEvents Boolean value"@en ;
+    sh:datatype xsd:boolean ;
+    sh:pattern "^(true|false)$" ;
+    sh:message "A CloudEvents Boolean is an xsd:boolean written as 'true' or 'false'."@en .
+
+cesh:BinaryValue a sh:NodeShape ;
+    rdfs:label "CloudEvents Binary value"@en ;
+    sh:datatype xsd:base64Binary ;
+    sh:message "A CloudEvents Binary value is an xsd:base64Binary literal."@en .
+
+cesh:URIValue a sh:NodeShape ;
+    rdfs:label "CloudEvents URI value"@en ;
+    sh:datatype xsd:anyURI ;
+    sh:pattern "^[A-Za-z][A-Za-z0-9+.-]*:\\S*$" ;
+    sh:message "A CloudEvents URI is an absolute URI (with a scheme), typed xsd:anyURI."@en .
+
+cesh:URIReferenceValue a sh:NodeShape ;
+    rdfs:label "CloudEvents URI-reference value"@en ;
+    sh:datatype xsd:anyURI ;
+    sh:pattern "^\\S*$" ;
+    sh:message "A CloudEvents URI-reference is an xsd:anyURI literal without whitespace."@en .
+
+cesh:TimestampValue a sh:NodeShape ;
+    rdfs:label "CloudEvents Timestamp value"@en ;
+    rdfs:comment
+      "The pattern repeats the xsd:dateTimeStamp lexical form, because not every SHACL engine detects ill-formed xsd:dateTimeStamp literals."@en ;
+    sh:datatype xsd:dateTimeStamp ;
+    sh:pattern "^-?[0-9]{4,}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?(Z|[+-]((0[0-9]|1[0-3]):[0-5][0-9]|14:00))$" ;
+    sh:message "A CloudEvents Timestamp is a valid xsd:dateTimeStamp (RFC 3339 with an offset)."@en .
+
+# ---------------------------------------------------------------------------
+# CloudEvent
+# ---------------------------------------------------------------------------
+
+cesh:CloudEventShape a sh:NodeShape ;
+    rdfs:label "CloudEvent"@en ;
+    rdfs:comment
+      "Plain JSON-LD conversions of CloudEvents carry no rdf:type, so every subject of a CloudEvents attribute predicate is targeted as well."@en ;
+    sh:targetClass ce:CloudEvent ;
+    sh:targetSubjectsOf ce:id, ce:source, ce:specversion, ce:type,
+        ce:datacontenttype, ce:dataschema, ce:subject, ce:time, ce:data,
+        ce:dataref, ce:traceparent, ce:tracestate, ce:partitionkey,
+        ce:sampledrate, ce:sequence, ce:sequencetype, ce:extensionAttribute ;
+
+    # Required core attributes
+    sh:property [
+        sh:path ce:specversion ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ; sh:in ( "1.0" ) ;
+        sh:message "specversion is required, exactly once, and must be \"1.0\"."@en ] ;
+    sh:property [
+        sh:path ce:id ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:node cesh:NonEmptyStringValue ;
+        sh:message "id is required, exactly once, as a nonempty String."@en ] ;
+    sh:property [
+        sh:path ce:source ; sh:minCount 1 ; sh:maxCount 1 ; sh:minLength 1 ;
+        sh:node cesh:URIReferenceValue ;
+        sh:message "source is required, exactly once, as a nonempty URI-reference."@en ] ;
+    sh:property [
+        sh:path ce:source ; sh:severity sh:Info ;
+        sh:pattern "^[A-Za-z][A-Za-z0-9+.-]*:" ;
+        sh:message "An absolute URI is recommended for source."@en ] ;
+    sh:property [
+        sh:path ce:type ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:node cesh:NonEmptyStringValue ;
+        sh:message "type is required, exactly once, as a nonempty String."@en ] ;
+
+    # Optional core attributes
+    sh:property [
+        sh:path ce:datacontenttype ; sh:maxCount 1 ;
+        sh:node cesh:StringValue ;
+        sh:pattern "^[!#$%&'*+.^_`|~0-9A-Za-z-]+/[!#$%&'*+.^_`|~0-9A-Za-z-]+(\\s*;.*)?$" ;
+        sh:message "datacontenttype occurs at most once and must be an RFC 2046 media type."@en ] ;
+    sh:property [
+        sh:path ce:dataschema ; sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "dataschema occurs at most once and must be an IRI."@en ] ;
+    sh:property [
+        sh:path ce:subject ; sh:maxCount 1 ;
+        sh:node cesh:NonEmptyStringValue ;
+        sh:message "subject occurs at most once and must be a nonempty String."@en ] ;
+    sh:property [
+        sh:path ce:time ; sh:maxCount 1 ;
+        sh:node cesh:TimestampValue ;
+        sh:message "time occurs at most once and must be a Timestamp."@en ] ;
+
+    # Data: data and data_base64 both map to ce:data, so this also forbids having both
+    sh:property [
+        sh:path ce:data ; sh:maxCount 1 ;
+        sh:message "An event has at most one data value."@en ] ;
+    sh:property [
+        sh:path ce:data ;
+        sh:or ( [ sh:datatype rdf:JSON ] [ sh:datatype xsd:base64Binary ] ) ;
+        sh:message "data must be an rdf:JSON literal, or an xsd:base64Binary literal for binary data."@en ] ;
+
+    # Documented extensions
+    sh:property [
+        sh:path ce:dataref ; sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "dataref occurs at most once and must be an IRI."@en ] ;
+    sh:property [
+        sh:path ce:traceparent ; sh:maxCount 1 ;
+        sh:node cesh:NonEmptyStringValue ;
+        sh:message "traceparent occurs at most once and must be a nonempty String."@en ] ;
+    sh:property [
+        sh:path ce:tracestate ; sh:maxCount 1 ;
+        sh:node cesh:StringValue ;
+        sh:message "tracestate occurs at most once and must be a String."@en ] ;
+    sh:property [
+        sh:path ce:partitionkey ; sh:maxCount 1 ;
+        sh:node cesh:NonEmptyStringValue ;
+        sh:message "partitionkey occurs at most once and must be a nonempty String."@en ] ;
+    sh:property [
+        sh:path ce:sampledrate ; sh:maxCount 1 ;
+        sh:node cesh:IntegerValue ; sh:minInclusive 1 ;
+        sh:message "sampledrate occurs at most once and must be an Integer greater than zero."@en ] ;
+    sh:property [
+        sh:path ce:sequence ; sh:maxCount 1 ;
+        sh:node cesh:NonEmptyStringValue ;
+        sh:message "sequence occurs at most once and must be a nonempty String."@en ] ;
+    sh:property [
+        sh:path ce:sequencetype ; sh:maxCount 1 ;
+        sh:node cesh:NonEmptyStringValue ;
+        sh:message "sequencetype occurs at most once and must be a nonempty String."@en ] .
+    # Reified extension attributes are validated by cesh:ExtensionAttributeShape through
+    # its own targets. They are not nested here with sh:node, because sh:node would turn
+    # that shape's warnings into violations of the event.
+
+# Distributed Tracing: traceparent is REQUIRED when the extension is used
+cesh:DistributedTracingShape a sh:NodeShape ;
+    rdfs:label "Distributed Tracing extension"@en ;
+    sh:targetSubjectsOf ce:tracestate ;
+    sh:property [
+        sh:path ce:traceparent ; sh:minCount 1 ;
+        sh:message "An event with tracestate must also have traceparent."@en ] .
+
+# Sequence: sequence is REQUIRED when the extension is used; sequencetype 'Integer'
+# means sequence holds a string-encoded signed integer
+cesh:SequenceShape a sh:NodeShape ;
+    rdfs:label "Sequence extension"@en ;
+    sh:targetSubjectsOf ce:sequencetype ;
+    sh:property [
+        sh:path ce:sequence ; sh:minCount 1 ;
+        sh:message "An event with sequencetype must also have sequence."@en ] ;
+    sh:or (
+        [ sh:not [ sh:property [ sh:path ce:sequencetype ; sh:hasValue "Integer" ] ] ]
+        [ sh:property [ sh:path ce:sequence ; sh:pattern "^-?(0|[1-9][0-9]*)$" ] ]
+    ) ;
+    sh:message "With sequencetype \"Integer\", sequence must be a string-encoded integer."@en .
+
+# ---------------------------------------------------------------------------
+# Reified extension attribute (fallback form)
+# ---------------------------------------------------------------------------
+
+cesh:ExtensionAttributeShape a sh:NodeShape ;
+    rdfs:label "Reified extension attribute"@en ;
+    sh:targetClass ce:ExtensionAttribute ;
+    sh:targetObjectsOf ce:extensionAttribute ;
+    sh:property [
+        sh:path ce:attributeName ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ; sh:pattern "^[a-z0-9]+$" ;
+        sh:message "attributeName is required, exactly once, using only a-z and 0-9."@en ] ;
+    sh:property [
+        sh:path ce:attributeName ;
+        sh:not [ sh:in ( "id" "source" "specversion" "type" "datacontenttype"
+                         "dataschema" "subject" "time" "data" ) ] ;
+        sh:message "Core attributes and data use their own predicates, not the extension form."@en ] ;
+    sh:property [
+        sh:path ce:attributeName ; sh:severity sh:Warning ;
+        sh:not [ sh:in ( "dataref" "traceparent" "tracestate" "partitionkey"
+                         "sampledrate" "sequence" "sequencetype" ) ] ;
+        sh:message "Documented extensions have a direct predicate (ce:{name}); prefer it."@en ] ;
+    sh:property [
+        sh:path ce:attributeName ; sh:severity sh:Warning ; sh:maxLength 20 ;
+        sh:message "Attribute names should not exceed 20 characters."@en ] ;
+    sh:property [
+        sh:path ce:attributeType ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:in ( ce:Boolean ce:Integer ce:String ce:Binary
+                ce:URI ce:URIReference ce:Timestamp ) ;
+        sh:message "attributeType is required, exactly once, and must be a CloudEvents type."@en ] ;
+    sh:property [
+        sh:path ce:attributeValue ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:message "attributeValue is required, exactly once, as a literal."@en ] ;
+    sh:or (
+        [ sh:property [ sh:path ce:attributeType ; sh:hasValue ce:Boolean ] ;
+          sh:property [ sh:path ce:attributeValue ; sh:node cesh:BooleanValue ] ]
+        [ sh:property [ sh:path ce:attributeType ; sh:hasValue ce:Integer ] ;
+          sh:property [ sh:path ce:attributeValue ; sh:node cesh:IntegerValue ] ]
+        [ sh:property [ sh:path ce:attributeType ; sh:hasValue ce:String ] ;
+          sh:property [ sh:path ce:attributeValue ; sh:node cesh:StringValue ] ]
+        [ sh:property [ sh:path ce:attributeType ; sh:hasValue ce:Binary ] ;
+          sh:property [ sh:path ce:attributeValue ; sh:node cesh:BinaryValue ] ]
+        [ sh:property [ sh:path ce:attributeType ; sh:hasValue ce:URI ] ;
+          sh:property [ sh:path ce:attributeValue ; sh:node cesh:URIValue ] ]
+        [ sh:property [ sh:path ce:attributeType ; sh:hasValue ce:URIReference ] ;
+          sh:property [ sh:path ce:attributeValue ; sh:node cesh:URIReferenceValue ] ]
+        [ sh:property [ sh:path ce:attributeType ; sh:hasValue ce:Timestamp ] ;
+          sh:property [ sh:path ce:attributeValue ; sh:node cesh:TimestampValue ] ]
+    ) ;
+    sh:message "attributeValue must match the datatype of its attributeType."@en .

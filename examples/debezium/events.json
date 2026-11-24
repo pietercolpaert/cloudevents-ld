@@ -1,0 +1,27 @@
+[
+  {
+    "id": "name:test_server;lsn:33227720;txId:578",
+    "source": "/debezium/postgresql/test_server",
+    "specversion": "1.0",
+    "type": "io.debezium.connector.postgresql.DataChangeEvent",
+    "time": "2020-01-13T14:04:18.597Z",
+    "datacontenttype": "application/avro",
+    "dataschema": "http://my-registry/schemas/ids/1",
+    "iodebeziumop": "r",
+    "iodebeziumversion": "{debezium-version}",
+    "iodebeziumconnector": "postgresql",
+    "iodebeziumname": "test_server",
+    "iodebeziumtsms": "1578924258597",
+    "iodebeziumsnapshot": "true",
+    "iodebeziumdb": "postgres",
+    "iodebeziumschema": "s1",
+    "iodebeziumtable": "a",
+    "iodebeziumtxId": "578",
+    "iodebeziumlsn": "33227720",
+    "iodebeziumxmin": null,
+    "iodebeziumtxid": "578",
+    "iodebeziumtxtotalorder": "1",
+    "iodebeziumtxdatacollectionorder": "1",
+    "data": "AAAAAAEAAgICAg=="
+  }
+]

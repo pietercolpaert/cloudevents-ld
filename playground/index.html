@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudEvents-LD playground</title>
+<meta name="description" content="Turn CloudEvents into Linked Data and align them with other vocabularies, in your browser.">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400&family=Ubuntu+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<header class="site-header post-header">
+  <div class="intro">
+    <h1>CloudEvents-LD playground</h1>
+    <p>Turn CloudEvents into Linked Data and align them with other vocabularies, all in your browser.</p>
+  </div>
+</header>
+
+<div class="url-bar-band">
+  <div class="examples-row">
+    <label class="examples-label" for="example">Load an example:</label>
+    <select id="example" class="select example-select"></select>
+  </div>
+  <div class="example-info">
+    <p class="example-description" id="example-description"></p>
+    <ul class="example-facts" id="example-facts"></ul>
+  </div>
+</div>
+
+<main class="layout">
+  <p id="status" role="status" aria-live="polite">Loading…</p>
+
+  <section class="panel step" aria-labelledby="input-title">
+    <h2 id="input-title"><span class="step-number">1</span> cloudevents <span class="hint">a CloudEvent, or a JSON batch of them; edit freely</span></h2>
+    <div id="events-editor" class="editor input-editor"></div>
+    <p id="unmapped" class="notice" hidden></p>
+    <details class="producer-context" id="producer-context">
+      <summary>» producer-specific context <span class="hint" id="producer-hint"></span></summary>
+      <p class="explain">
+        <code>context.jsonld</code> maps the CloudEvents attributes and the extensions CloudEvents documents.
+        Producers define other extension attributes; to keep them, map them here to predicates in the producer's namespace.
+        This context is applied after <code>context.jsonld</code> and cannot redefine its terms.
+      </p>
+      <div id="context-editor" class="editor context-editor"></div>
+    </details>
+  </section>
+
+  <section class="panel step" aria-labelledby="log-title">
+    <h2 id="log-title"><span class="step-number">2</span> cloudevents-ld <span class="hint" id="log-hint"></span></h2>
+    <p class="explain">
+      Applying <a href="./context.jsonld">context.jsonld</a> turns each CloudEvent into one RDF Message, using the
+      <a href="./terms.ttl">CloudEvents-LD vocabulary</a>. Together they form an RDF Message Log. The <code>data</code>
+      payload stays an opaque <code>rdf:JSON</code> literal: parse it separately, based on its <code>datacontenttype</code> and <code>dataschema</code>.
+    </p>
+    <div id="log-editor" class="editor output-editor"></div>
+  </section>
+
+  <section class="panel step align" aria-labelledby="align-title">
+    <h2 id="align-title"><span class="step-number">3</span> align with another vocabulary</h2>
+    <p class="explain">
+      Because the events are now Linked Data, they are not only interoperable with CloudEvents, but with any vocabulary that
+      <a href="./alignments.ttl">alignments.ttl</a> links to. eyemind reasons over the vocabulary and its alignments, guided by
+      <code>shapes.ttl</code> as the shape of each incoming message and by the target's shapes as the shape it must produce.
+    </p>
+    <div class="field target-field">
+      <label for="target">Target vocabulary</label>
+      <select id="target" class="select">
+        <option value="">Choose a vocabulary…</option>
+      </select>
+    </div>
+    <div id="target-info" class="target-info" hidden></div>
+    <div id="align-result" hidden>
+      <h3>derived triples <span class="hint" id="aligned-hint"></span></h3>
+      <div id="aligned-editor" class="editor output-editor"></div>
+      <h3>validation <span class="hint" id="align-validation-hint"></span></h3>
+      <div id="align-validation" class="validation"></div>
+    </div>
+  </section>
+
+  <section class="panel snippets" aria-labelledby="snippets-title">
+    <h2 id="snippets-title">do this in your own project</h2>
+    <div class="snippet">
+      <div class="snippet-header">
+        <h3>javascript, with jsonld.js</h3>
+        <button type="button" class="copy-btn" data-target="code-js">Copy</button>
+      </div>
+      <pre><code id="code-js"></code></pre>
+    </div>
+    <div class="snippet">
+      <div class="snippet-header">
+        <h3>command line, with eyemind</h3>
+        <button type="button" class="copy-btn" data-target="code-cli">Copy</button>
+      </div>
+      <pre><code id="code-cli"></code></pre>
+    </div>
+  </section>
+</main>
+
+<footer>
+  CloudEvents-LD (proposal):
+  <a href="./terms.ttl">vocabulary</a> ·
+  <a href="./context.jsonld">JSON-LD context</a> ·
+  <a href="./shapes.ttl">SHACL shapes</a> ·
+  <a href="./alignments.ttl">alignments</a>.
+  Reasoning by <a href="https://github.com/eyereasoner/eyemind">eyemind</a>.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/turtle/turtle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js"></script>
+<script src="./playground.js"></script>
+</body>
+</html>

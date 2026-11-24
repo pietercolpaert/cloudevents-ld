@@ -1,0 +1,21 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "debezium": "https://example.org/debezium#",
+    "iodebeziumop": "debezium:iodebeziumop",
+    "iodebeziumversion": "debezium:iodebeziumversion",
+    "iodebeziumconnector": "debezium:iodebeziumconnector",
+    "iodebeziumname": "debezium:iodebeziumname",
+    "iodebeziumtsms": "debezium:iodebeziumtsms",
+    "iodebeziumsnapshot": "debezium:iodebeziumsnapshot",
+    "iodebeziumdb": "debezium:iodebeziumdb",
+    "iodebeziumschema": "debezium:iodebeziumschema",
+    "iodebeziumtable": "debezium:iodebeziumtable",
+    "iodebeziumtxId": "debezium:iodebeziumtxId",
+    "iodebeziumlsn": "debezium:iodebeziumlsn",
+    "iodebeziumxmin": "debezium:iodebeziumxmin",
+    "iodebeziumtxid": "debezium:iodebeziumtxid",
+    "iodebeziumtxtotalorder": "debezium:iodebeziumtxtotalorder",
+    "iodebeziumtxdatacollectionorder": "debezium:iodebeziumtxdatacollectionorder"
+  }
+}

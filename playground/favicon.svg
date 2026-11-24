@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CloudEvents-LD">
+  <rect width="64" height="64" rx="14" fill="#416b91"/>
+  <rect x="11" y="18" width="34" height="24" rx="3" fill="#fff"/>
+  <path d="M12 20l16 12 16-12" fill="none" stroke="#416b91" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M45 30l8-8M45 30l8 8" fill="none" stroke="#d8e7f4" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="53" cy="22" r="5" fill="#f1a93b"/>
+  <circle cx="53" cy="38" r="5" fill="#fff"/>
+</svg>

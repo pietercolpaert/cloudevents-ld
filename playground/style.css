@@ -1,0 +1,513 @@
+/* Palette, type and components lifted from the ldfetch playground
+   (https://github.com/pietercolpaert/ldfetch), which takes them from
+   pietercolpaert.be, so both playgrounds read as one family. */
+:root {
+  --primary: #3b6790;
+  --primary-light: #8cadcc;
+  --accent: #ffb347;
+  --text: #313231;
+  --bg: #f9f9f9;
+  --font-body: 'Open Sans', sans-serif;
+  --font-mono: 'Ubuntu Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --violation: #b3452e;
+  --warning: #b7791f;
+  --info: var(--primary);
+  --ok: #276749;
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+
+a:hover { color: var(--accent); }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+/* ----------------------------
+   Header
+----------------------------- */
+.site-header.post-header {
+  background: linear-gradient(135deg, #345c83 0%, #3b6790 50%, #2f5377 100%);
+  color: white;
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+}
+
+.site-header.post-header .intro {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.site-header.post-header h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.site-header.post-header p {
+  margin: 0.6rem 0 0;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ----------------------------
+   Examples band
+----------------------------- */
+.url-bar-band {
+  width: 100%;
+  background: #eef4fb;
+  border-bottom: 1px solid #d6deea;
+  padding: 1rem 1.5rem;
+}
+
+.examples-row {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.examples-label {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  color: #52606f;
+}
+
+/* Selects with a custom arrow, set a little in from the right edge */
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #bfcce0;
+  border-radius: 6px;
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%233b6790' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 0.75rem;
+  padding: 0.5rem 2.6rem 0.5rem 0.75rem;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.select:hover { border-color: var(--primary-light); }
+
+.select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 103, 144, 0.15);
+}
+
+.example-select {
+  flex: 0 1 34rem;
+  min-width: 0;
+  border-radius: 999px;
+  padding-left: 1.1rem;
+  padding-right: 2.8rem;
+  background-position: right 1.1rem center;
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(59, 103, 144, 0.12);
+}
+
+.example-info {
+  max-width: 1100px;
+  margin: 0.6rem auto 0;
+}
+
+.example-description {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #52606f;
+}
+
+.example-description:empty { display: none; }
+
+.example-facts {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.example-facts li {
+  padding: 0.1rem 0.7rem;
+  border: 1px solid #d6deea;
+  border-radius: 999px;
+  background: white;
+  color: #52606f;
+  font-size: 0.78rem;
+}
+
+.example-facts strong { color: var(--primary); }
+
+/* ----------------------------
+   Headings, in the site's small-caps style
+----------------------------- */
+h2, h3 {
+  font-weight: 700;
+  text-transform: lowercase;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  margin-top: 0;
+  color: var(--primary);
+}
+
+.panel h2::before {
+  content: "» ";
+  color: var(--primary);
+}
+
+.panel.step h2::before { content: none; }
+
+.step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  margin-right: 0.35rem;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  font-variant: normal;
+  font-size: 0.85rem;
+  letter-spacing: 0;
+  vertical-align: 0.1em;
+}
+
+.align .step-number { background: var(--accent); color: var(--text); }
+
+/* ----------------------------
+   Layout
+----------------------------- */
+.layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+}
+
+.layout > *, .panel, .editor { min-width: 0; }
+
+.panel {
+  border: 1px solid #e7e7e7;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.panel h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+}
+
+.panel h3 {
+  font-size: 1rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.hint {
+  font-family: var(--font-body);
+  font-variant: normal;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: normal;
+  color: #666;
+  font-size: 0.8em;
+}
+
+.explain {
+  margin: 0 0 0.85rem;
+  font-size: 0.9rem;
+  color: #4a5561;
+}
+
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.field .select {
+  width: 100%;
+  max-width: 24rem;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.copy-btn {
+  border: 1px solid #c6d3e3;
+  background: #f9fbfd;
+  color: var(--text);
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.copy-btn:hover {
+  background: #ecf2f9;
+  border-color: var(--primary-light);
+}
+
+#status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  min-height: 1.3em;
+  overflow-wrap: anywhere;
+}
+
+#status.error { color: var(--violation); font-weight: 600; }
+#status.busy::before { content: "⏳ "; }
+
+.notice {
+  margin: 0.75rem 0 0;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #f3d9a6;
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: #fffaf0;
+  font-size: 0.85rem;
+}
+
+/* ----------------------------
+   Editors
+----------------------------- */
+.editor {
+  border: 1px solid #e7e7e7;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.editor::after {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.input-editor .CodeMirror { height: 22rem; }
+/* Output editors fit their content; showOutput in app.js caps their height */
+.output-editor .CodeMirror { height: auto; }
+
+/* After an error, the results of the last successful run are dimmed */
+.stale .output-editor, .stale .validation, .stale #align-result { opacity: 0.45; }
+.context-editor .CodeMirror { height: 12rem; }
+
+.CodeMirror {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.producer-context { margin-top: 0.85rem; }
+
+.producer-context > summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 700;
+  font-variant: small-caps;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+/* ----------------------------
+   Validation reports
+----------------------------- */
+.validation-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid currentColor;
+  background: white;
+}
+
+.badge.ok { color: var(--ok); }
+.badge.Violation { color: var(--violation); }
+.badge.Warning { color: var(--warning); }
+.badge.Info { color: var(--info); }
+
+.results {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.results th {
+  text-align: left;
+  color: #536779;
+  font-weight: 700;
+  border-bottom: 1px solid #dfe6ee;
+  padding: 0.35rem 0.5rem;
+}
+
+.results td {
+  border-bottom: 1px solid #eef2f6;
+  padding: 0.4rem 0.5rem;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.results td.severity { font-weight: 700; white-space: nowrap; }
+.results td.severity.Violation { color: var(--violation); }
+.results td.severity.Warning { color: var(--warning); }
+.results td.severity.Info { color: var(--info); }
+.results code { color: var(--primary); }
+
+/* ----------------------------
+   Alignment
+----------------------------- */
+.target-field { margin-bottom: 0.85rem; }
+
+.target-info {
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #cfe0f0;
+  border-left: 4px solid var(--primary);
+  border-radius: 6px;
+  background: #f5f9fd;
+  font-size: 0.85rem;
+}
+
+.target-info p { margin: 0; }
+.target-info p + p { margin-top: 0.4rem; }
+
+/* ----------------------------
+   Snippets and footer
+----------------------------- */
+.snippet { margin-bottom: 1.25rem; }
+.snippet:last-child { margin-bottom: 0; }
+
+.snippet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.snippet-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.snippet pre {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  background: #fafafa;
+  border: 1px solid #e7e7e7;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+footer {
+  font-size: 0.85rem;
+  color: #666;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: white;
+  border-top: 1px solid #ddd;
+}
+
+@media (max-width: 650px) {
+  .examples-row { align-items: stretch; flex-direction: column; }
+  .example-select { flex-basis: auto; }
+  .results th:nth-child(4), .results td:nth-child(4) { display: none; }
+}
+
+/* ----------------------------
+   CodeMirror theme, matching the Rouge "site palette" theme used for
+   Turtle code blocks on pietercolpaert.be
+----------------------------- */
+.cm-s-pietercolpaert.CodeMirror {
+  background: #ffffff;
+  color: var(--text);
+}
+
+.cm-s-pietercolpaert .CodeMirror-gutters {
+  background: #fafafa;
+  border-right: 1px solid #eee;
+}
+
+.cm-s-pietercolpaert .CodeMirror-linenumber { color: #999; }
+.cm-s-pietercolpaert .CodeMirror-cursor { border-left: 1px solid var(--text); }
+.cm-s-pietercolpaert .CodeMirror-selected { background: rgba(140, 173, 204, 0.25); }
+
+/* Comments -- and, in this Turtle mode, capitalised local names too */
+.cm-s-pietercolpaert .cm-comment {
+  color: #8a8f99;
+  font-style: italic;
+}
+
+/* @prefix / @base / a */
+.cm-s-pietercolpaert .cm-meta {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* lowercase local names (predicates) */
+.cm-s-pietercolpaert .cm-keyword { color: var(--primary); }
+
+/* string and numeric literals */
+.cm-s-pietercolpaert .cm-string,
+.cm-s-pietercolpaert .cm-string-2,
+.cm-s-pietercolpaert .cm-number { color: #b7791f; }
+
+/* full IRIs */
+.cm-s-pietercolpaert .cm-atom { color: #276749; }
+
+/* namespace prefix (before the colon) */
+.cm-s-pietercolpaert .cm-variable-3 {
+  color: #276749;
+  font-weight: 600;
+}
+
+/* colon between prefix and local name */
+.cm-s-pietercolpaert .cm-operator { color: #4a4a4a; }
+
+/* JSON mode, used by the CloudEvents and context editors */
+.cm-s-pietercolpaert .cm-property { color: var(--primary); }
+.cm-s-pietercolpaert .cm-def { color: var(--primary); }

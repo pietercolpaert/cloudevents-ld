@@ -1,0 +1,519 @@
+# CloudEvents RDF Schema vocabulary — proposal, not an official CNCF publication yet.
+# CloudEvents core specification v1.0.2:
+# https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md
+#
+# The core model (events, context attributes, attribute types, extensions) describes
+# CloudEvents independently of any wire encoding. The messaging section at the end is an
+# informative module describing how events travel between producers and consumers.
+#
+# Naming rule: every term in this namespace that is NOT a CloudEvents attribute contains an
+# upper-case letter (or is `data`). CloudEvents attribute names are restricted to [a-z0-9],
+# so attributes that CloudEvents documents in the future can get `ce:{attribute name}`
+# without colliding with a vocabulary term.
+
+@base    <https://w3id.org/cloudevents> .
+@prefix ce:   <https://w3id.org/cloudevents#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+
+<> a owl:Ontology ;
+    dct:title "CloudEvents RDF Schema vocabulary (proposal)"@en ;
+    dct:description
+      """An RDF representation of the CloudEvents 1.0 core event model, context attributes, abstract attribute types, extension attributes, and messaging concepts. This is a non-normative proposal.
+
+Representation rule: each context attribute is represented by a direct predicate whose literal value uses the RDF datatype given by ce:rdfDatatype for the attribute's abstract type. The core attributes and the extension attributes documented in CloudEvents v1.0.2 have predicates in this namespace, named after the attribute (<https://w3id.org/cloudevents#N> for attribute N). Other extension attributes are defined by their producers and use predicates in the producer's own namespace, which can be described with ce:attributeName and ce:attributeType; this vocabulary does not mint IRIs for them. The reified ce:ExtensionAttribute form is a fallback for recording an extension attribute's abstract type explicitly."""@en ;
+    dct:creator <https://pietercolpaert.be/#me> ;
+    dct:rightsHolder "Vlaamse Regio"@nl ;
+    dct:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
+    dct:issued "2026-11-23"^^xsd:date ;
+    dct:modified "2026-11-23"^^xsd:date ;
+    owl:versionInfo "0.1.0 (proposal)" ;
+    vann:preferredNamespacePrefix "ce" ;
+    vann:preferredNamespaceUri "https://w3id.org/cloudevents#" ;
+    dct:source <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md> ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md> ;
+    owl:imports <https://w3id.org/cloudevents/alignments.ttl> .
+
+<https://pietercolpaert.be/#me> rdfs:label "Pieter Colpaert" .
+
+# Core concepts
+
+ce:CloudEvent a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvent"@en ;
+    rdfs:comment
+      "An event record expressing an occurrence and its context, as defined by the CloudEvents specification. Its RDF subject is not determined by its id attribute alone: the CloudEvents identity of an event is the combination of source and id."@en .
+
+ce:Occurrence a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Occurrence"@en ;
+    rdfs:comment
+      "A captured statement of fact during the operation of a software system. One occurrence may be represented by multiple events."@en .
+
+ce:Producer a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Producer"@en ;
+    rdfs:comment
+      "An instance, process, or device that creates the data structure describing a CloudEvent; not necessarily the source where the occurrence happened."@en .
+
+ce:SourceContext a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Source context"@en ;
+    rdfs:comment
+      "The context in which an occurrence happened (called 'Source' in the CloudEvents specification). A source may involve multiple producers. This class is not the range of ce:source, which preserves the original URI-reference value as a literal."@en .
+
+ce:Consumer a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Consumer"@en ;
+    rdfs:comment
+      "An application or component that receives an event and acts upon it."@en .
+
+ce:Intermediary a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Intermediary"@en ;
+    rdfs:comment
+      "A component receiving an event-bearing message for forwarding to another receiver, which might be another intermediary or a consumer."@en .
+
+ce:AttributeProperty a rdfs:Class ;
+    rdfs:subClassOf rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Context attribute predicate"@en ;
+    rdfs:comment
+      "An RDF predicate that directly represents a CloudEvents context attribute; its ce:attributeName and ce:attributeType state the wire name and abstract type. For the core attributes and the documented extension attributes, its IRI is this vocabulary's namespace followed by the attribute name. Producers may type their own extension predicates with this class."@en .
+
+ce:ExtensionAttribute a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Reified extension attribute"@en ;
+    rdfs:comment
+      "A reified extension context attribute: a name, CloudEvents abstract type and value. Prefer a direct predicate (ce:{name} for documented extensions, or the producer's own predicate); use this form only when the abstract type of an extension attribute has to be recorded explicitly, for example because an event format encodes URI, Timestamp and String values identically."@en .
+
+# Properties describing attribute predicates and reified extension attributes.
+# These deliberately have no rdfs:domain: they apply both to ce:AttributeProperty
+# predicates and to ce:ExtensionAttribute nodes.
+
+ce:attributeName a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "attribute name"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment
+      "The literal CloudEvents attribute name (for example, 'specversion' or 'traceparent'). Applies to attribute predicates and to reified extension attributes."@en .
+
+ce:attributeType a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "attribute type"@en ;
+    rdfs:range ce:AttributeType ;
+    rdfs:comment
+      "The abstract CloudEvents type of an attribute. Applies to attribute predicates and to reified extension attributes."@en .
+
+ce:attributeValue a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "attribute value"@en ;
+    rdfs:domain ce:ExtensionAttribute ;
+    rdfs:range rdfs:Literal ;
+    rdfs:comment
+      "The value of a reified extension attribute, as a literal whose datatype is the ce:rdfDatatype of its ce:attributeType."@en .
+
+# CloudEvents abstract attribute types and their RDF datatypes
+
+ce:AttributeType a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents abstract attribute type"@en ;
+    rdfs:comment
+      "A type in the CloudEvents abstract type system. Instances describe CloudEvents values; they are not RDF datatypes themselves, but each one maps to exactly one RDF datatype via ce:rdfDatatype."@en .
+
+ce:rdfDatatype a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "RDF datatype"@en ;
+    rdfs:domain ce:AttributeType ;
+    rdfs:range rdfs:Datatype ;
+    rdfs:comment
+      "The RDF datatype used for literal values of a CloudEvents abstract type."@en .
+
+ce:Boolean a ce:AttributeType ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Boolean"@en ;
+    ce:rdfDatatype xsd:boolean ;
+    rdfs:comment
+      "Boolean value. CloudEvents only allows the lexical forms 'true' and 'false', not the xsd:boolean forms '1' and '0'."@en .
+
+ce:Integer a ce:AttributeType ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Integer"@en ;
+    ce:rdfDatatype xsd:integer ;
+    rdfs:comment
+      "Signed 32-bit integer in the inclusive range -2147483648 to 2147483647. Represented as xsd:integer (which is what JSON-LD produces for JSON numbers); the range restriction is enforced by the SHACL shapes."@en .
+
+ce:String a ce:AttributeType ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "String"@en ;
+    ce:rdfDatatype xsd:string ;
+    rdfs:comment
+      "Unicode string without control characters (U+0000-U+001F, U+007F-U+009F), noncharacters, or unpaired surrogates. Never language-tagged."@en .
+
+ce:Binary a ce:AttributeType ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Binary"@en ;
+    ce:rdfDatatype xsd:base64Binary ;
+    rdfs:comment
+      "Sequence of bytes; its canonical string encoding uses RFC 4648 Base64."@en .
+
+ce:URI a ce:AttributeType ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "URI"@en ;
+    ce:rdfDatatype xsd:anyURI ;
+    rdfs:comment "Absolute URI, as specified by RFC 3986. Literal values use xsd:anyURI; an attribute predicate may instead take IRIs (named nodes) as values, as ce:dataschema does."@en .
+
+ce:URIReference a ce:AttributeType ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "URI-reference"@en ;
+    ce:rdfDatatype xsd:anyURI ;
+    rdfs:comment
+      "URI-reference as specified by RFC 3986; may be absolute or relative. A literal value (xsd:anyURI) is never resolved against an RDF base IRI. An attribute predicate may instead take IRIs as values, as ce:dataref does; a relative reference is then resolved against the base IRI of the document it was read from."@en .
+
+ce:Timestamp a ce:AttributeType ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Timestamp"@en ;
+    ce:rdfDatatype xsd:dateTimeStamp ;
+    rdfs:comment
+      "Date/time in RFC 3339 format, represented as xsd:dateTimeStamp, which, like RFC 3339, requires a time zone offset. RFC 3339 forms that are not valid xsd:dateTimeStamp lexical forms must be normalised: an upper-case 'T' and 'Z' replace lower-case 't' and 'z', and 'T' replaces a space separator. A leap second (:60) cannot be represented. The offset '-00:00' (RFC 3339: offset unknown) is kept lexically but has the same value as 'Z'."@en .
+
+# REQUIRED core context attributes (four)
+
+ce:id a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "id"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "id" ;
+    ce:attributeType ce:String ;
+    rdfs:comment
+      "Nonempty identifier of the event, unique for distinct events in combination with source. Retransmission of a duplicate may reuse the same source and id. The value is NOT a globally unique event IRI by itself."@en .
+
+ce:source a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "source"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:anyURI ;
+    ce:attributeName "source" ;
+    ce:attributeType ce:URIReference ;
+    rdfs:comment
+      "Nonempty URI-reference identifying the context where the occurrence happened. An absolute URI is recommended but not required. Preserve the lexical value rather than resolving relative references against the RDF document base; this is a literal attribute, not an RDF relation to a ce:SourceContext resource."@en .
+
+ce:specversion a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "specversion"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "specversion" ;
+    ce:attributeType ce:String ;
+    rdfs:comment
+      "Version of the CloudEvents specification that defines the event's context. For CloudEvents core 1.0.2 this has the literal value '1.0', not '1.0.2'."@en .
+
+ce:type a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "type"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "type" ;
+    ce:attributeType ce:String ;
+    rdfs:comment
+      "Nonempty producer-defined event type string. Reverse-DNS prefixes are recommended. This is NOT rdf:type: a CloudEvents type string does not automatically identify an RDF class."@en .
+
+# OPTIONAL core context attributes (four)
+
+ce:datacontenttype a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "datacontenttype"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "datacontenttype" ;
+    ce:attributeType ce:String ;
+    rdfs:comment
+      "Media type of the event data, as defined by RFC 2046. In certain event formats, absence may imply a media type (for example, application/json in the JSON event format)."@en .
+
+ce:dataschema a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "dataschema"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range rdfs:Resource ;
+    ce:attributeName "dataschema" ;
+    ce:attributeType ce:URI ;
+    rdfs:comment
+      "The schema to which the event data adheres, identified by a nonempty absolute URI. Represented as an IRI (named node), so the schema can be dereferenced and linked; as the value is always absolute, no base IRI is involved. No equivalence to an RDF class or SHACL shape is implied."@en .
+
+ce:subject a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "subject"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "subject" ;
+    ce:attributeType ce:String ;
+    rdfs:comment
+      "Nonempty string identifying the subject of the event within the context of source. It is not necessarily a URI and should not be treated as dct:subject or an RDF resource without an explicit mapping."@en .
+
+ce:time a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "time"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:dateTimeStamp ;
+    ce:attributeName "time" ;
+    ce:attributeType ce:Timestamp ;
+    rdfs:comment
+      "Timestamp of the occurrence, or a consistently selected substitute time if the actual occurrence time cannot be determined. Not the time the event record was created or delivered. See ce:Timestamp for normalising RFC 3339 values."@en .
+
+# Event data
+
+ce:data a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "data"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range rdfs:Literal ;
+    rdfs:comment
+      "Optional payload of the event (the CloudEvents 'data'); not a context attribute. Kept as an opaque literal: an rdf:JSON literal holding the JSON value of the data member of the JSON event format (for non-JSON content types, the JSON string that carries the data), or an xsd:base64Binary literal for binary data (the data_base64 member). Interpreting the payload as RDF depends on its datacontenttype and dataschema and is done separately, outside this vocabulary."@en .
+
+# Documented extension attributes (CloudEvents v1.0.2, cloudevents/extensions/)
+
+ce:dataref a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "dataref"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range rdfs:Resource ;
+    ce:attributeName "dataref" ;
+    ce:attributeType ce:URIReference ;
+    rdfs:seeAlso <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/dataref.md> ;
+    rdfs:comment
+      "Dataref extension (claim check pattern): the location where the event payload is stored, from which consumers can retrieve it. Represented as an IRI (named node). A relative reference is resolved against the base IRI of the document it was read from; without a base IRI it cannot be represented and is left out."@en .
+
+ce:traceparent a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "traceparent"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "traceparent" ;
+    ce:attributeType ce:String ;
+    rdfs:seeAlso <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/distributed-tracing.md> ;
+    rdfs:comment
+      "Distributed Tracing extension: version, trace ID, span ID and trace options as defined by W3C Trace Context. Required when the extension is used."@en .
+
+ce:tracestate a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "tracestate"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "tracestate" ;
+    ce:attributeType ce:String ;
+    rdfs:seeAlso <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/distributed-tracing.md> ;
+    rdfs:comment
+      "Distributed Tracing extension: comma-delimited list of vendor-specific key-value pairs as defined by W3C Trace Context."@en .
+
+ce:partitionkey a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "partitionkey"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "partitionkey" ;
+    ce:attributeType ce:String ;
+    rdfs:seeAlso <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/partitioning.md> ;
+    rdfs:comment
+      "Partitioning extension: nonempty partition key for the event, typically used by brokers to group related events."@en .
+
+ce:sampledrate a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "sampledrate"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:integer ;
+    ce:attributeName "sampledrate" ;
+    ce:attributeType ce:Integer ;
+    rdfs:seeAlso <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/sampledrate.md> ;
+    rdfs:comment
+      "Sampled Rate extension: the rate at which this event has already been sampled, as the number of similar events that happened but were not sent, plus one. Greater than zero."@en .
+
+ce:sequence a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "sequence"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "sequence" ;
+    ce:attributeType ce:String ;
+    rdfs:seeAlso <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/sequence.md> ;
+    rdfs:comment
+      "Sequence extension: nonempty, lexicographically orderable string expressing the relative order of the event within a source."@en .
+
+ce:sequencetype a ce:AttributeProperty ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "sequencetype"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range xsd:string ;
+    ce:attributeName "sequencetype" ;
+    ce:attributeType ce:String ;
+    rdfs:seeAlso <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/extensions/sequence.md> ;
+    rdfs:comment
+      "Sequence extension: semantics of the sequence attribute. The only value defined in v1.0.2 is 'Integer' (sequence holds string-encoded signed 32-bit integers)."@en .
+
+# Fallback: reified extension attributes
+
+ce:extensionAttribute a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "extension attribute"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range ce:ExtensionAttribute ;
+    rdfs:comment
+      "Connects a CloudEvent to a reified extension context attribute. Prefer a direct predicate (ce:{name} for documented extensions, or the producer's own predicate). Extensions follow the CloudEvents naming rules and abstract type system; this mechanism does not limit extension names to the documented extensions."@en .
+
+# Optional Linked Data links beyond the CloudEvents context attributes
+
+ce:describesOccurrence a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "describes occurrence"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range ce:Occurrence ;
+    rdfs:comment
+      "OPTIONAL Linked Data enrichment connecting an event to a separately identified occurrence. Not derivable from the CloudEvents attributes, and not part of their wire representation."@en .
+
+ce:producedBy a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "produced by"@en ;
+    rdfs:domain ce:CloudEvent ;
+    rdfs:range ce:Producer ;
+    rdfs:comment
+      "OPTIONAL Linked Data enrichment identifying the producer that created the event record. The producer and the CloudEvents source are not necessarily identical."@en .
+
+# Messaging module (informative): messages, event formats and protocol bindings
+
+ce:Message a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Message"@en ;
+    rdfs:comment "A transport message that carries CloudEvents from a source to a destination."@en .
+
+ce:StructuredMessage a rdfs:Class ;
+    rdfs:subClassOf ce:Message ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Structured-mode message"@en ;
+    rdfs:comment
+      "A message whose body contains the complete event, encoded using an event format."@en .
+
+ce:BinaryMessage a rdfs:Class ;
+    rdfs:subClassOf ce:Message ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Binary-mode message"@en ;
+    rdfs:comment
+      "A message whose body contains the event data and whose message metadata carries the context attributes, as defined by a protocol binding."@en .
+
+ce:BatchMessage a rdfs:Class ;
+    rdfs:subClassOf ce:Message ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Batch-mode message"@en ;
+    rdfs:comment
+      "A message whose body carries zero or more CloudEvents. Batch mode is defined by event formats and protocol bindings (for example the JSON batch format with the HTTP binding), not by the core specification. An empty batch carries no events."@en .
+
+ce:EventFormat a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Event format"@en ;
+    rdfs:comment
+      "Specification of a serialization of CloudEvents into a sequence of bytes."@en .
+
+ce:ProtocolBinding a rdfs:Class ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "Protocol binding"@en ;
+    rdfs:comment
+      "Specification of how CloudEvents are sent and received over a particular transport protocol."@en .
+
+ce:carriesEvent a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "carries event"@en ;
+    rdfs:domain ce:Message ;
+    rdfs:range ce:CloudEvent ;
+    rdfs:comment
+      "Relates a transport message to a CloudEvent it carries."@en .
+
+ce:usesEventFormat a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "uses event format"@en ;
+    rdfs:domain ce:Message ;
+    rdfs:range ce:EventFormat ;
+    rdfs:comment "Identifies the event format used to serialize a structured-mode or batch-mode message."@en .
+
+ce:usesProtocolBinding a rdf:Property ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "uses protocol binding"@en ;
+    rdfs:domain ce:Message ;
+    rdfs:range ce:ProtocolBinding ;
+    rdfs:comment "Identifies the protocol binding used to transport a message."@en .
+
+# Event formats (CloudEvents v1.0.2, cloudevents/formats/)
+
+ce:JSONEventFormat a ce:EventFormat ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents JSON event format"@en ;
+    rdfs:comment
+      "The stand-alone CloudEvents JSON event format; media type application/cloudevents+json."@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md> .
+
+ce:JSONBatchFormat a ce:EventFormat ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents JSON batch format"@en ;
+    rdfs:comment
+      "A JSON array of zero or more events in the JSON event format; media type application/cloudevents-batch+json. A conforming JSON event-format implementation does not necessarily support the batch format."@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md> .
+
+ce:AvroEventFormat a ce:EventFormat ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents Avro event format"@en ;
+    rdfs:comment "The CloudEvents Apache Avro event format."@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/avro-format.md> .
+
+ce:ProtobufEventFormat a ce:EventFormat ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents Protocol Buffers event format"@en ;
+    rdfs:comment
+      "The CloudEvents Protocol Buffers event format; media type application/cloudevents+protobuf."@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/protobuf-format.md> .
+
+# Protocol bindings (CloudEvents v1.0.2, cloudevents/bindings/)
+
+ce:HTTPProtocolBinding a ce:ProtocolBinding ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents HTTP protocol binding"@en ;
+    rdfs:comment
+      "Binary, structured and batch mode over HTTP; context attributes become ce- prefixed headers in binary mode."@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/http-protocol-binding.md> .
+
+ce:AMQPProtocolBinding a ce:ProtocolBinding ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents AMQP protocol binding"@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/amqp-protocol-binding.md> .
+
+ce:KafkaProtocolBinding a ce:ProtocolBinding ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents Kafka protocol binding"@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/kafka-protocol-binding.md> .
+
+ce:MQTTProtocolBinding a ce:ProtocolBinding ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents MQTT protocol binding"@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/mqtt-protocol-binding.md> .
+
+ce:NATSProtocolBinding a ce:ProtocolBinding ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents NATS protocol binding"@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/nats-protocol-binding.md> .
+
+ce:WebSocketsProtocolBinding a ce:ProtocolBinding ;
+    rdfs:isDefinedBy <> ;
+    rdfs:label "CloudEvents WebSockets protocol binding"@en ;
+    rdfs:seeAlso
+      <https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/bindings/websockets-protocol-binding.md> .
