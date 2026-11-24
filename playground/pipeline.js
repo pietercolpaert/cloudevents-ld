@@ -158,13 +158,19 @@ function mapMessage(reasoner, state, quads) {
   return { result, ms: performance.now() - started };
 }
 
-// Writes eyemind quads with N3.js, so that triples are grouped per subject and the
-// (often long) ce:data comes last.
-async function grouped(eyemindQuads, options) {
-  const quads = new Parser({ blankNodePrefix: '' }).parse(writeRdf(eyemindQuads, options))
-    .sort((a, b) => (a.predicate.value === CE_DATA) - (b.predicate.value === CE_DATA));
-  return { quads, turtle: withoutPrefixes(await turtleOf(quads, options.prefixes)) };
+// The given and the derived triples of a message as N3.js quads, with one label per
+// blank node throughout. eyemind's writer numbers blank nodes per call, so writing
+// the two sets separately could give the event two different labels; they are
+// therefore written in one call, one line per triple, and split after the given ones.
+function givenAndDerived(given, derived, blankNodePrefix) {
+  const lines = writeRdf([...given, ...derived], { format: 'n-quads', blankNodePrefix }).split('\n').filter(Boolean);
+  const parse = (part) => new Parser({ format: 'N-Quads', blankNodePrefix: '' }).parse(part.join('\n'));
+  return { given: parse(lines.slice(0, given.length)), derived: parse(lines.slice(given.length)) };
 }
+
+// Turtle with triples grouped per subject and the (often long) ce:data last.
+const grouped = (quads, prefixes) =>
+  turtleOf([...quads].sort((a, b) => (a.predicate.value === CE_DATA) - (b.predicate.value === CE_DATA)), prefixes).then(withoutPrefixes);
 
 // For each message, derives what the SHACL output shape asks for. Returns, per
 // message, its full closure: the CloudEvents-LD triples together with what was
@@ -177,14 +183,14 @@ async function align(reasoner, state, logText) {
     const { result, ms } = mapMessage(reasoner, state, message.quads);
     Object.assign(prefixes, message.prefixes);
     const options = { format: 'turtle', prefixes: { ...reasoner.prefixes, ...message.prefixes }, blankNodePrefix: `e${index + 1}_` };
-    const given = await grouped(message.quads, options);
-    const derived = await grouped(result.quads, options);
+    const { given, derived } = givenAndDerived(message.quads, result.quads, options.blankNodePrefix);
+    const derivedTurtle = await grouped(derived, options.prefixes);
     results.push({
       index,
       ms,
-      givenCount: given.quads.length,
-      derivedCount: derived.quads.length,
-      closure: `${given.turtle}\n# Derived by eyemind\n${derived.turtle || '# (nothing)'}`,
+      givenCount: given.length,
+      derivedCount: derived.length,
+      closure: `${await grouped(given, options.prefixes)}\n# Derived by eyemind\n${derivedTurtle || '# (nothing)'}`,
       merged: writeRdf([...message.quads, ...result.quads], options),
     });
   }
