@@ -93,7 +93,35 @@ LDES paths can only reach the envelope: the payload stays an `rdf:JSON` literal 
 
 ### Does this demo support RDF Messages?
 
-This demo uses a JSON-LD c
+Yes, but not with JSON-LD alone. A batch of CloudEvents is a JSON array, one event per element (the JSON batch format, `application/cloudevents-batch+json`). A JSON-LD processor that applies `context.jsonld` to that array produces one RDF graph with the triples of all events. The boundaries between the events are lost: nothing in the result says which triples belong to which event, and when two events mention the same resource, their triples merge.
+
+The playground and `npm run build:examples` therefore apply the context to each element of the array separately, outside JSON-LD. The playground writes the results as an [RDF Message](https://w3c-cg.github.io/rsp/spec/messages) Log, one message per event:
+
+```turtle
+@version "1.1-messages" .
+@prefix ce: <https://w3id.org/cloudevents#> .
+
+_:e1_b0 ce:id "1" ; ce:type "basisregisters.address.create.v1" ; … .
+@message .
+_:e2_b0 ce:id "2" ; … .
+```
+
+[eyemind](https://github.com/eyereasoner/eyemind) then aligns each message on its own (`--stream-messages`), so each event's alignment only sees that event.
+
+To get the same result from a JSON-LD processor and an external context alone, JSON-LD needs a way to say that the elements of an array are separate RDF Messages. [w3c-cg/rsp#52](https://github.com/w3c-cg/rsp/issues/52) proposes this: a `@messages` container, which makes each element of an array its own message, and a way to apply such a container to a top-level array. `context.jsonld` could then declare that a CloudEvents batch is a message log, for example like this (hypothetical syntax, still under discussion):
+
+```json
+{
+  "@context": {
+    "@version": 1.1,
+    "@root": { "@container": "@messages" },
+    "id": "ce:id",
+    "…": "…"
+  }
+}
+```
+
+Existing CloudEvents APIs would then be readable as RDF Message Streams without changing their responses, and a JSON-LD parser could emit each event as soon as it has read it. The alternative discussed in [w3c-cg/rsp#53](https://github.com/w3c-cg/rsp/issues/53) is to declare message boundaries in an RML mapping instead.
 
 ## License and copyright
 
