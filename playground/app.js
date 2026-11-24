@@ -233,22 +233,23 @@ async function align(id) {
     : `eyemind is planning the rules for ${target.label}; the first run takes a few seconds…`, 'busy');
   await nextFrame();
   if (id !== runId) return;
-  const started = performance.now();
   if (!aligners.has(target.id)) {
     aligners.set(target.id, pipeline.createAligner({ background, shapesIn: shapesText, shapesOut: target.shapes }));
   }
   const result = await aligners.get(target.id)(current.log.text);
-  const seconds = ((performance.now() - started) / 1000).toFixed(1);
   $('align-result').hidden = false;
   showOutput(alignedCm, result.text);
-  $('aligned-hint').textContent = `${plural(result.triples, 'triple')} derived by eyemind in ${seconds} s`;
+  // The one-off set-up (closing the background, specializing the rules per message
+  // shape) is left out: over a stream of messages, the mapping is what counts.
+  const ms = result.averageMs < 10 ? result.averageMs.toFixed(1) : Math.round(result.averageMs);
+  $('aligned-hint').textContent = `${plural(result.triples, 'triple')}, of which ${result.derived} derived by eyemind; ${ms} ms per message on average`;
   const targetPrefixes = Object.fromEntries([...target.shapes.matchAll(/@prefix\s+([\w-]*):\s*<([^>]+)>/g)].map((m) => [m[1], m[2]]));
   const prefixes = { ...targetPrefixes, ...current.log.prefixes };
   const results = result.messages.flatMap((m) => pipeline.validate(m.merged, target.shapes).map((r) => ({ ...r, event: m.index + 1 })));
   renderValidation($('align-validation'), results, result.messages.length, prefixes);
   $('align-validation-hint').textContent = `of each CloudEvent with what was derived, against the ${target.label} target shapes`;
   const violations = results.filter((r) => r.severity === 'Violation').length;
-  setStatus(`Aligned with ${target.label}: ${plural(result.triples, 'triple')} derived; ${violations
+  setStatus(`Aligned with ${target.label}: ${plural(result.derived, 'triple')} derived; ${violations
     ? `${plural(violations, 'violation')} of the target shapes, see the explanation in step 3.`
     : 'the result conforms to the target shapes.'}`);
 }

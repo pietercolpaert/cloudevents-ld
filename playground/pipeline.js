@@ -129,9 +129,9 @@ export function validateMessages(messages, shapesTurtle, prefixes) {
 
 // 3. An aligner for one target vocabulary: OWL 2 RL over the background (terms.ttl
 // and alignments.ttl), planned by the SHACL input shape and the target's SHACL output
-// shape. The background is closed once, and planning takes a moment, as does the
-// first message of each shape, so keep the aligner and reuse it: later messages of
-// the same shape are fast.
+// shape. Setting up takes a moment: closing the background once, and specializing
+// the rules for the first message of each shape. Keep the aligner and reuse it, as a
+// stream of messages would: mapping a message afterwards is fast.
 export function createAligner({ background, shapesIn, shapesOut }) {
   const reasoner = loadMessageReasoner([[background, 'background.ttl']], null, {
     owl2rl: true,
@@ -139,31 +139,64 @@ export function createAligner({ background, shapesIn, shapesOut }) {
     shaclOut: [[shapesOut, 'target-shapes.ttl']],
     limits: LIMITS,
   });
-  return (logText) => align(reasoner, logText);
+  const state = { warm: false };
+  return (logText) => align(reasoner, state, logText);
 }
 
-// For each message, derives what the SHACL output shape asks for. Returns the
-// derived triples and, for validation, each message together with what was
-// derived for it.
-async function align(reasoner, logText) {
+// Maps one message, and the time that took. Two one-offs are left out of that time:
+// the first message closes the background, and the first message of each shape may
+// have the rules specialized for it. Such a message is mapped again to time the
+// mapping alone.
+function mapMessage(reasoner, state, quads) {
+  let started = performance.now();
+  let result = reasoner.infer(quads, LIMITS);
+  if (!state.warm || result.sources) {
+    state.warm = true;
+    started = performance.now();
+    result = reasoner.infer(quads, LIMITS);
+  }
+  return { result, ms: performance.now() - started };
+}
+
+// Writes eyemind quads with N3.js, so that triples are grouped per subject and the
+// (often long) ce:data comes last.
+async function grouped(eyemindQuads, options) {
+  const quads = new Parser({ blankNodePrefix: '' }).parse(writeRdf(eyemindQuads, options))
+    .sort((a, b) => (a.predicate.value === CE_DATA) - (b.predicate.value === CE_DATA));
+  return { quads, turtle: withoutPrefixes(await turtleOf(quads, options.prefixes)) };
+}
+
+// For each message, derives what the SHACL output shape asks for. Returns, per
+// message, its full closure: the CloudEvents-LD triples together with what was
+// derived, as text for display and as Turtle for validation.
+async function align(reasoner, state, logText) {
   const { messages } = parseRdfMessages(logText, { format: 'turtle' });
   const prefixes = { ...reasoner.prefixes };
   const results = [];
   for (const [index, message] of messages.entries()) {
-    const result = reasoner.infer(message.quads, LIMITS);
+    const { result, ms } = mapMessage(reasoner, state, message.quads);
     Object.assign(prefixes, message.prefixes);
     const options = { format: 'turtle', prefixes: { ...reasoner.prefixes, ...message.prefixes }, blankNodePrefix: `e${index + 1}_` };
-    // Written with N3.js, so that the triples are grouped per subject.
-    const quads = new Parser({ blankNodePrefix: '' }).parse(writeRdf(result.quads, options));
+    const given = await grouped(message.quads, options);
+    const derived = await grouped(result.quads, options);
     results.push({
       index,
-      derivedCount: quads.length,
-      derived: withoutPrefixes(await turtleOf(quads, options.prefixes)),
+      ms,
+      givenCount: given.quads.length,
+      derivedCount: derived.quads.length,
+      closure: `${given.turtle}\n# Derived by eyemind\n${derived.turtle || '# (nothing)'}`,
       merged: writeRdf([...message.quads, ...result.quads], options),
     });
   }
-  const used = Object.fromEntries(Object.entries(prefixes).filter(([p]) => results.some((r) => r.derived.includes(`${p}:`))));
+  // Prefixes used as prefixed names, not merely mentioned inside a literal.
+  const used = Object.fromEntries(Object.entries(prefixes).filter(([p]) => results.some((r) => new RegExp(`(^|[\\s;,(\\[^])${p}:`, 'm').test(r.closure))));
   const text = `@version "1.1-messages" .\n${prefixLines(used)}\n\n` +
-    results.map((r) => `# Derived for CloudEvent ${r.index + 1}\n${r.derived || '# (nothing derived)'}`).join('\n@message .\n\n') + '\n';
-  return { text, messages: results, triples: results.reduce((n, r) => n + r.derivedCount, 0) };
+    results.map((r) => `# CloudEvent ${r.index + 1}\n${r.closure}`).join('\n@message .\n\n') + '\n';
+  return {
+    text,
+    messages: results,
+    triples: results.reduce((n, r) => n + r.givenCount + r.derivedCount, 0),
+    derived: results.reduce((n, r) => n + r.derivedCount, 0),
+    averageMs: results.reduce((n, r) => n + r.ms, 0) / Math.max(results.length, 1),
+  };
 }
