@@ -40,6 +40,15 @@
     <h2 id="input-title"><span class="step-number">1</span> cloudevents <span class="hint">a CloudEvent, or a JSON batch of them; edit freely</span></h2>
     <div id="events-editor" class="editor input-editor"></div>
     <p id="unmapped" class="notice" hidden></p>
+    <details class="producer-context" id="main-context">
+      <summary>» cloudevents-ld context <span class="hint">(context.jsonld, read-only)</span></summary>
+      <p class="explain">
+        Applied to every CloudEvent: it maps the CloudEvents attributes and the extensions CloudEvents documents to the
+        <a href="./terms.ttl">CloudEvents-LD vocabulary</a>, and keeps <code>data</code> as an <code>rdf:JSON</code> literal.
+        Its terms are protected, so other contexts cannot redefine them. <a href="./context.jsonld">Download context.jsonld</a>.
+      </p>
+      <div id="main-context-editor" class="editor context-editor"></div>
+    </details>
     <details class="producer-context" id="producer-context">
       <summary>» producer-specific context <span class="hint" id="producer-hint"></span></summary>
       <p class="explain">

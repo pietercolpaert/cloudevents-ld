@@ -326,6 +326,11 @@ button {
 .stale .output-editor, .stale .validation, .stale #align-result { opacity: 0.45; }
 .context-editor .CodeMirror { height: 12rem; }
 
+/* The CloudEvents-LD context: shown in full, read-only */
+#main-context-editor .CodeMirror { height: 20rem; }
+#main-context-editor .CodeMirror,
+#main-context-editor .CodeMirror-gutters { background: #fafafa; }
+
 .CodeMirror {
   font-family: var(--font-mono);
   font-size: 0.9rem;
